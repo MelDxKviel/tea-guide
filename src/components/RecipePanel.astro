@@ -1,4 +1,5 @@
 ---
+import { getEntry, type CollectionEntry } from 'astro:content';
 import { t, sourceCountLabel } from '../i18n';
 import { formatDuration } from '../lib/brewing/calculate';
 import type { BrewingRecipe } from '../lib/brewing/types';
@@ -11,6 +12,16 @@ interface Props {
 
 const { recipe, methodLabel, note } = Astro.props;
 const sourceCount = recipe.sourceRefs.length;
+const recipeSources = (
+  await Promise.all(
+    recipe.sourceRefs.map(async (ref) => ({
+      ref,
+      source: await getEntry('sources', ref.sourceId),
+    })),
+  )
+).filter((item): item is { ref: (typeof recipe.sourceRefs)[number]; source: CollectionEntry<'sources'> } =>
+  Boolean(item.source),
+);
 ---
 
 <section class="recipe-panel" data-recipe-id={recipe.id}>
@@ -93,12 +104,20 @@ const sourceCount = recipe.sourceRefs.length;
 
   <details class="details">
     <summary>{t('tea.recipeBySources')} · {sourceCountLabel(sourceCount)}</summary>
-    <ul>
-      {recipe.sourceRefs.map((ref) => (
-        <li>
-          <code>{ref.sourceId}</code>: {ref.supports.join(', ')}
-        </li>
-      ))}
+    <ul class="sources">
+      {
+        recipeSources.map(({ ref, source }) => (
+          <li>
+            <a href={source.data.url} rel="noopener noreferrer" target="_blank">
+              {source.data.title}
+            </a>
+            <div class="meta-line">
+              {source.data.publisher} · {source.data.language}
+              {ref.supports.length > 0 ? ` · ${ref.supports.join(', ')}` : ''}
+            </div>
+          </li>
+        ))
+      }
     </ul>
   </details>
 </section>
