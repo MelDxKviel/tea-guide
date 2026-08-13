@@ -13,7 +13,10 @@ const sourceCount = recipe.sourceRefs.length;
 ---
 
 <section class="recipe-panel" data-recipe-id={recipe.id}>
-  <p class="kicker">{methodLabel}</p>
+  <div class="recipe-panel__label">
+    <p class="kicker">{t('tea.baseRecipe')}</p>
+    <p class="recipe-panel__method">{methodLabel}</p>
+  </div>
   <div class="recipe-panel__grid">
     <div class="stat">
       <dt>Лист / вода</dt>

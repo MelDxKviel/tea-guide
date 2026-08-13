@@ -185,6 +185,7 @@ function template(session: BrewSession, recipe: BrewingRecipe, prefs: UserPrefer
       : '';
     return `
       <div class="timer-shell">
+        <p class="timer-kicker">${t('timer.label')}</p>
         <div class="timer-top"><a href="${teaPath(session.teaSlug)}">${t('timer.backToTea')}</a></div>
         <h1 class="timer-name">${session.teaName}</h1>
         <p class="timer-status is-done">${t('timer.sessionDone')}</p>
@@ -246,13 +247,16 @@ function template(session: BrewSession, recipe: BrewingRecipe, prefs: UserPrefer
 
   return `
     <div class="timer-shell">
+      <p class="timer-kicker">${t('timer.label')}</p>
       <div class="timer-top">
         <a href="${teaPath(session.teaSlug)}">${session.teaName}</a>
         <span>${session.leafGrams} г · ${session.volumeMl} мл</span>
       </div>
-      <div class="timer-stage">${stageLabel}</div>
       <div class="timer-clock">
-        <div class="timer-digits" data-clock data-testid="clock">${formatDurationMs(remainingMs(session.timer, Date.now()))}</div>
+        <p class="timer-stage">${stageLabel}</p>
+        <div class="timer-well">
+          <div class="timer-digits" data-clock data-testid="clock">${formatDurationMs(remainingMs(session.timer, Date.now()))}</div>
+        </div>
         <p class="timer-status ${complete ? 'is-done' : ''}" aria-live="assertive">${status}</p>
       </div>
       <div class="timer-actions">

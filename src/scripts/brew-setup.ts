@@ -92,10 +92,13 @@ export function mountBrewSetup(): void {
     const infusions = recipe.infusions?.length ?? 0;
     const temp = recipe.temperature?.recommendedCelsius;
     preview.innerHTML = `
-      <div class="preview-stats">
-        <div class="stat"><dt>Лист</dt><dd>${t('brew.grams', { n: formatGrams(grams) })}</dd></div>
-        <div class="stat"><dt>Вода</dt><dd>${temp ? t('brew.temp', { n: temp }) : '—'}</dd></div>
-        <div class="stat"><dt>Проливы</dt><dd>${t('brew.infusionCount', { n: infusions })}</dd></div>
+      <div class="calc-result">
+        <p class="kicker">${t('brew.result')}</p>
+        <div class="preview-stats">
+          <div class="stat"><dt>Лист</dt><dd>${t('brew.grams', { n: formatGrams(grams) })}</dd></div>
+          <div class="stat"><dt>Вода</dt><dd>${temp ? t('brew.temp', { n: temp }) : '—'}</dd></div>
+          <div class="stat"><dt>Проливы</dt><dd>${t('brew.infusionCount', { n: infusions })}</dd></div>
+        </div>
       </div>
     `;
   };

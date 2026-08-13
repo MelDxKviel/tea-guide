@@ -84,37 +84,42 @@ const origin = [tea.data.origin.country, tea.data.origin.province, tea.data.orig
         </div>
       </header>
 
-      <h2>{t('tea.howTo')}</h2>
-      <p class="meta-line">{t('tea.baseRecipe')}</p>
-      <nav class="methods" aria-label={t('tea.howTo')}>
-        {gongfu.length > 0 && <a href="#method-gongfu">{t('tea.method.gongfu')}</a>}
-        {other.map((item) => <a href={`#method-${item.method}`}>{methodLabel(item.method)}</a>)}
-      </nav>
+      <section class="tool-block" aria-labelledby="brew-tools-title">
+        <header class="tool-block__head">
+          <p class="kicker">{t('tea.toolLabel')}</p>
+          <h2 id="brew-tools-title">{t('tea.toolTitle')}</h2>
+          <p class="tool-block__lead">{t('tea.toolLead')}</p>
+        </header>
+        <nav class="methods" aria-label={t('tea.howTo')}>
+          {gongfu.length > 0 && <a href="#method-gongfu">{t('tea.method.gongfu')}</a>}
+          {other.map((item) => <a href={`#method-${item.method}`}>{methodLabel(item.method)}</a>)}
+        </nav>
 
-      <div id="method-gongfu">
+        <div id="method-gongfu">
+          {
+            gongfu.map((recipe) => (
+              <RecipePanel recipe={recipe} methodLabel={methodLabel('gongfu')} />
+            ))
+          }
+          {
+            gongfu.length > 0 && (
+              <div class="btn-row">
+                <button class="btn" type="button" data-open-brew>
+                  {t('tea.brewGongfu')}
+                </button>
+              </div>
+            )
+          }
+        </div>
+
         {
-          gongfu.map((recipe) => (
-            <RecipePanel recipe={recipe} methodLabel={methodLabel('gongfu')} />
+          other.map((recipe) => (
+            <div id={`method-${recipe.method}`}>
+              <RecipePanel recipe={recipe} methodLabel={methodLabel(recipe.method)} />
+            </div>
           ))
         }
-        {
-          gongfu.length > 0 && (
-            <div class="btn-row">
-              <button class="btn" type="button" data-open-brew>
-                {t('tea.brewGongfu')}
-              </button>
-            </div>
-          )
-        }
-      </div>
-
-      {
-        other.map((recipe) => (
-          <div id={`method-${recipe.method}`}>
-            <RecipePanel recipe={recipe} methodLabel={methodLabel(recipe.method)} />
-          </div>
-        ))
-      }
+      </section>
 
       {
         defaultGongfu?.temperature && (

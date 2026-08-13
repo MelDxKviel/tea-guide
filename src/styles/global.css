@@ -303,11 +303,49 @@ main {
   text-underline-offset: 0.15em;
 }
 
+.tool-block {
+  margin: 1.6rem 0 2.2rem;
+  padding: 1.15rem 1.1rem 1.3rem;
+  background: var(--surface);
+  border: 1px solid var(--ink);
+}
+
+.tool-block__head {
+  margin-bottom: 1rem;
+}
+
+.tool-block__head h2 {
+  font-family: var(--serif);
+  font-size: clamp(1.7rem, 4vw, 2.3rem);
+  letter-spacing: -0.03em;
+  margin: 0 0 0.35rem;
+}
+
+.tool-block__lead {
+  margin: 0;
+  color: var(--ink-soft);
+  max-width: 36rem;
+}
+
 .recipe-panel {
-  border-top: 1px solid var(--ink);
-  border-bottom: 1px solid var(--line);
-  padding: 1.1rem 0 1.25rem;
-  margin: 1.4rem 0;
+  border: 1px solid var(--line);
+  background: var(--bg);
+  padding: 1rem 1rem 1.1rem;
+  margin: 0 0 0.85rem;
+}
+
+.recipe-panel__label {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.recipe-panel__method {
+  margin: 0;
+  font-size: 0.92rem;
+  color: var(--ink-soft);
 }
 
 .recipe-panel__grid {
@@ -344,8 +382,9 @@ main {
 }
 
 .infusion-list li {
-  border: 1px solid var(--line);
-  padding: 0.2rem 0.45rem;
+  border: 1px solid var(--ink);
+  background: var(--surface);
+  padding: 0.28rem 0.5rem;
 }
 
 .btn {
@@ -583,7 +622,33 @@ dialog.sheet::backdrop {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 0.6rem;
+  margin: 0;
+}
+
+.calc-result {
   margin: 1rem 0 1.2rem;
+  padding: 0.85rem 0.95rem 1rem;
+  background: var(--ink);
+  color: var(--surface);
+}
+
+.calc-result .kicker {
+  color: rgb(243 236 223 / 0.62);
+}
+
+.calc-result .stat dt {
+  color: rgb(243 236 223 / 0.55);
+}
+
+.calc-result .stat dd {
+  color: var(--surface);
+}
+
+.sheet__head h2 {
+  font-family: var(--serif);
+  font-size: 1.7rem;
+  letter-spacing: -0.03em;
+  margin: 0.15rem 0 0;
 }
 
 .tea-hero {
@@ -663,9 +728,17 @@ body.is-timer {
   color: inherit;
 }
 
+.timer-kicker {
+  font-size: 0.72rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--timer-hot);
+  margin: 0 0 0.55rem;
+}
+
 .timer-stage {
-  margin-top: 1.4rem;
-  font-size: 0.95rem;
+  margin: 0 0 0.55rem;
+  font-size: 1.05rem;
   color: var(--timer-muted);
 }
 
@@ -684,6 +757,12 @@ body.is-timer {
   min-height: 28vh;
 }
 
+.timer-well {
+  border: 1px solid rgb(243 236 223 / 0.22);
+  background: #100e0b;
+  padding: 1.1rem 0.8rem 0.85rem;
+}
+
 .timer-digits {
   font-family: var(--mono);
   font-variant-numeric: tabular-nums;
@@ -692,6 +771,19 @@ body.is-timer {
   letter-spacing: -0.04em;
   line-height: 0.9;
   font-weight: 500;
+}
+
+.timer-track {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-top: 1rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid rgb(243 236 223 / 0.14);
+  font-family: var(--mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 0.82rem;
+  color: var(--timer-muted);
 }
 
 .timer-status {
@@ -727,17 +819,6 @@ body.is-timer {
   background: transparent;
   color: var(--timer-ink);
   border-color: rgb(243 236 223 / 0.28);
-}
-
-.timer-track {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.35rem;
-  margin-top: 1rem;
-  font-family: var(--mono);
-  font-variant-numeric: tabular-nums;
-  font-size: 0.82rem;
-  color: var(--timer-muted);
 }
 
 .timer-track span {
@@ -807,6 +888,10 @@ body.is-timer {
   .timer-shell {
     width: min(40rem, 100%);
     margin-inline: auto;
+  }
+
+  .tool-block {
+    padding: 1.4rem 1.4rem 1.5rem;
   }
 }
 
