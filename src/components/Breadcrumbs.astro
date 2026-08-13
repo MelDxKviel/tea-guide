@@ -1,0 +1,40 @@
+---
+import { homePath } from '../lib/urls';
+
+interface Crumb {
+  href?: string;
+  label: string;
+}
+
+interface Props {
+  items: Crumb[];
+}
+
+const { items } = Astro.props;
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Tea Guide', item: Astro.site ? new URL('.', Astro.site).href : homePath() },
+    ...items.map((item, index) => ({
+      '@type': 'ListItem',
+      position: index + 2,
+      name: item.label,
+      ...(item.href && Astro.site ? { item: new URL(item.href.replace(/^\//, ''), Astro.site).href } : {}),
+    })),
+  ],
+};
+---
+
+<nav class="crumbs" aria-label="Навигационная цепочка">
+  <a href={homePath()}>Tea Guide</a>
+  {
+    items.map((item) => (
+      <>
+        <span aria-hidden="true">→</span>
+        {item.href ? <a href={item.href}>{item.label}</a> : <span aria-current="page">{item.label}</span>}
+      </>
+    ))
+  }
+</nav>
+<script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />

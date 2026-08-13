@@ -1,0 +1,30 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import { t } from '../../i18n';
+import { guidePath } from '../../lib/urls';
+
+const guides = (await getCollection('guides')).sort((a, b) => a.data.sortOrder - b.data.sortOrder);
+---
+
+<BaseLayout
+  title="О чае — Tea Guide"
+  description="Как заваривать проливами, сколько класть листа, какая температура воды нужна и зачем промывают чай."
+>
+  <div class="wrap">
+    <Breadcrumbs items={[{ label: t('nav.guides') }]} />
+    <h1 class="page-title">{t('nav.guides')}</h1>
+    <p class="lead">Короткие практические тексты. Без «чайных путешествий» — только то, что помогает заварить.</p>
+    <div class="grid-cards">
+      {
+        guides.map((guide) => (
+          <a class="tea-card" href={guidePath(guide.id)}>
+            <h2>{guide.data.title}</h2>
+            <p>{guide.data.description}</p>
+          </a>
+        ))
+      }
+    </div>
+  </div>
+</BaseLayout>

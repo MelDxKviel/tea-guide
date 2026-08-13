@@ -1,0 +1,28 @@
+---
+import { t } from '../i18n';
+import type { SearchDocument } from '../lib/search';
+
+interface Props {
+  documents: SearchDocument[];
+}
+
+const { documents } = Astro.props;
+---
+
+<div class="search" data-search>
+  <label class="visually-hidden" for="tea-search">{t('search.label')}</label>
+  <input
+    id="tea-search"
+    type="search"
+    placeholder={t('search.placeholder')}
+    autocomplete="off"
+    enterkeyhint="search"
+    data-search-input
+  />
+  <div class="search__results" data-search-results hidden></div>
+  <script type="application/json" data-search-index set:html={JSON.stringify(documents)} />
+</div>
+<script>
+  import { mountSearch } from '../scripts/search';
+  mountSearch();
+</script>

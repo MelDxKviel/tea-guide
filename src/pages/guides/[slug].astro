@@ -1,0 +1,36 @@
+---
+import { getCollection, render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import { t } from '../../i18n';
+import { guidePath } from '../../lib/urls';
+
+export async function getStaticPaths() {
+  const guides = await getCollection('guides');
+  return guides.map((guide) => ({ params: { slug: guide.id }, props: { guide } }));
+}
+
+const { guide } = Astro.props;
+const { Content } = await render(guide);
+---
+
+<BaseLayout
+  title={guide.data.seo?.title ?? `${guide.data.title} — Tea Guide`}
+  description={guide.data.seo?.description ?? guide.data.description}
+  ogType="article"
+  jsonLd={{
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline: guide.data.title,
+    description: guide.data.description,
+    inLanguage: 'ru',
+  }}
+>
+  <div class="wrap">
+    <Breadcrumbs items={[{ href: guidePath(), label: t('nav.guides') }, { label: guide.data.title }]} />
+    <article class="prose">
+      <h1 class="page-title">{guide.data.title}</h1>
+      <Content />
+    </article>
+  </div>
+</BaseLayout>

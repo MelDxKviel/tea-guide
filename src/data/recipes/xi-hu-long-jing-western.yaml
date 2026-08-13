@@ -1,0 +1,27 @@
+id: xi-hu-long-jing-western
+teaId: xi-hu-long-jing
+method: western
+referenceVolumeMl: 150
+referenceLeafGrams: 3
+temperature:
+  recommendedCelsius: 85
+  minCelsius: 80
+  maxCelsius: 85
+durationSeconds: 150
+notes:
+  - "Без крышки. 1:50, 2–3 минуты."
+sourceRefs:
+  - sourceId: xhlj-association
+    supports:
+      - temperature
+  - sourceId: caas-linzhi
+    supports:
+      - western_method
+      - leaf_ratio
+      - temperature
+  - sourceId: jiemian-longjing
+    supports:
+      - leaf_ratio
+      - western_method
+      - temperature
+confidence: high

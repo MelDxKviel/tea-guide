@@ -1,0 +1,35 @@
+id: xi-hu-long-jing-gongfu-gaiwan
+teaId: xi-hu-long-jing
+method: gongfu
+vessel: gaiwan
+referenceVolumeMl: 120
+referenceLeafGrams: 3
+temperature:
+  recommendedCelsius: 85
+  minCelsius: 80
+  maxCelsius: 85
+infusions:
+  - number: 1
+    durationSeconds: 40
+  - number: 2
+    durationSeconds: 25
+  - number: 3
+    durationSeconds: 80
+notes:
+  - Секунды — из технического регламента шифэнского лунцзина (при участии Института чая).
+sourceRefs:
+  - sourceId: xhlj-association
+    supports:
+      - temperature
+      - origin
+  - sourceId: shifeng-longjing
+    supports:
+      - leaf_ratio
+      - water_volume
+      - temperature
+      - infusion_times
+      - vessel
+  - sourceId: gb-t-18650-2008
+    supports:
+      - origin
+confidence: high

@@ -1,0 +1,61 @@
+---
+import { t } from '../i18n';
+import type { BrewingRecipe } from '../lib/brewing/types';
+interface Props {
+  teaId: string;
+  teaSlug: string;
+  teaName: string;
+  recipes: BrewingRecipe[];
+}
+
+const { teaId, teaSlug, teaName, recipes } = Astro.props;
+const payload = {
+  teaId,
+  teaSlug,
+  teaName,
+  recipes,
+  lastVolumeMl: null as number | null,
+};
+---
+
+<div data-brew-setup>
+  <dialog class="sheet" aria-labelledby="brew-setup-title">
+    <div class="sheet__body">
+      <div class="sheet__head">
+        <div>
+          <p class="kicker">{t('tea.method.gongfu')}</p>
+          <h2 id="brew-setup-title">{teaName}</h2>
+        </div>
+        <button class="btn btn--ghost" type="button" data-close-brew>{t('brew.close')}</button>
+      </div>
+
+      <div class="field" data-vessel-field>
+        <label>{t('brew.vessel')}</label>
+        <div class="choice-row" data-vessel-choices></div>
+      </div>
+
+      <div class="field">
+        <label>{t('brew.volume')}</label>
+        <div class="choice-row" data-volume-choices></div>
+        <label class="visually-hidden" for="custom-volume">{t('brew.volume.custom')}</label>
+        <input id="custom-volume" data-custom-volume type="text" inputmode="decimal" hidden />
+        <p class="notice notice--warn" data-volume-warning hidden></p>
+      </div>
+
+      <div class="field">
+        <label>{t('brew.strength')}</label>
+        <div class="choice-row" data-strength-choices></div>
+      </div>
+
+      <div data-preview></div>
+      <button class="btn btn--wide" type="button" data-start-session data-testid="start-session">
+        {t('brew.start')}
+      </button>
+    </div>
+  </dialog>
+  <script type="application/json" data-brew-payload set:html={JSON.stringify(payload)} />
+</div>
+<script>
+  import { mountBrewSetup } from '../scripts/brew-setup';
+  mountBrewSetup();
+</script>

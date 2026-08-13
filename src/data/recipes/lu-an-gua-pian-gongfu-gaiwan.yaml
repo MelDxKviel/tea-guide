@@ -1,0 +1,28 @@
+id: lu-an-gua-pian-gongfu-gaiwan
+teaId: lu-an-gua-pian
+method: gongfu
+vessel: gaiwan
+referenceVolumeMl: 120
+referenceLeafGrams: 4
+temperature:
+  recommendedCelsius: 90
+  minCelsius: 85
+  maxCelsius: 95
+infusions:
+  - number: 1
+    durationSeconds: 40
+  - number: 2
+    durationSeconds: 60
+  - number: 3
+    durationSeconds: 90
+notes:
+  - Для зелёных основной бытовой способ — стекло. Гайвань здесь вспомогательная.
+sourceRefs:
+  - sourceId: caas-linzhi
+    supports:
+      - temperature
+      - leaf_ratio
+  - sourceId: people-health-tea
+    supports:
+      - temperature
+confidence: medium

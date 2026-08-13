@@ -1,0 +1,20 @@
+---
+interface Props {
+  accent?: string;
+  title: string;
+}
+
+const { accent = '#1d4536', title } = Astro.props;
+---
+
+<svg class="tea-card__mark" viewBox="0 0 320 90" role="img" aria-hidden="true">
+  <title>{title}</title>
+  <rect width="320" height="90" fill={accent} />
+  <path
+    d="M36 62c18-28 38-40 70-40 24 0 36 10 52 10 22 0 38-16 62-16 28 0 48 18 64 34"
+    fill="none"
+    stroke="rgba(243,236,223,.55)"
+    stroke-width="2"
+  />
+  <circle cx="268" cy="28" r="10" fill="none" stroke="rgba(243,236,223,.7)" stroke-width="1.5" />
+</svg>

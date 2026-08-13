@@ -1,0 +1,47 @@
+---
+import { getCollection, getEntry } from 'astro:content';
+import CategoryView from '../../components/pages/CategoryView.astro';
+import SubgroupView from '../../components/pages/SubgroupView.astro';
+import TeaView from '../../components/pages/TeaView.astro';
+import { subgroupsOf, teasByCategory, teasBySubgroup } from '../../lib/content/catalog';
+
+export async function getStaticPaths() {
+  const teas = await getCollection('teas');
+  const categories = await getCollection('categories');
+  const subgroups = await getCollection('subgroups');
+
+  return [
+    ...categories.map((category) => ({
+      params: { slug: category.data.slug },
+      props: { kind: 'category' as const, id: category.id },
+    })),
+    ...subgroups.map((subgroup) => ({
+      params: { slug: `${subgroup.data.categoryId}/${subgroup.data.slug}` },
+      props: { kind: 'subgroup' as const, id: subgroup.id },
+    })),
+    ...teas.map((tea) => ({
+      params: { slug: tea.data.slug },
+      props: { kind: 'tea' as const, id: tea.id },
+    })),
+  ];
+}
+
+const { kind, id } = Astro.props;
+
+const category = kind === 'category' ? await getEntry('categories', id) : undefined;
+const subgroup = kind === 'subgroup' ? await getEntry('subgroups', id) : undefined;
+const tea = kind === 'tea' ? await getEntry('teas', id) : undefined;
+const subgroupCategory =
+  subgroup ? await getEntry('categories', subgroup.data.categoryId) : undefined;
+const categorySubgroups = category ? await subgroupsOf(category.data.id) : [];
+const categoryTeas = category ? await teasByCategory(category.data.id) : [];
+const subgroupTeas = subgroup ? await teasBySubgroup(subgroup.data.id) : [];
+---
+
+{category && <CategoryView category={category} subgroups={categorySubgroups} teas={categoryTeas} />}
+{
+  subgroup && (
+    <SubgroupView subgroup={subgroup} category={subgroupCategory} teas={subgroupTeas} />
+  )
+}
+{tea && <TeaView tea={tea} />}

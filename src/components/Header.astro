@@ -1,0 +1,37 @@
+---
+import { t } from '../i18n';
+import { catalogPath, guidePath, homePath, sessionPath, teawarePath } from '../lib/urls';
+
+interface Props {
+  currentPath: string;
+}
+
+const { currentPath } = Astro.props;
+const items = [
+  { href: catalogPath(), label: t('nav.teas'), match: '/tea/' },
+  { href: teawarePath(), label: t('nav.teaware'), match: '/teaware/' },
+  { href: guidePath(), label: t('nav.guides'), match: '/guides/' },
+];
+---
+
+<header class="site-header">
+  <div class="wrap site-header__inner">
+    <a class="brand" href={homePath()}>
+      {t('site.name')}
+      <small>проливы</small>
+    </a>
+    <a class="session-chip" data-session-chip href={sessionPath()} hidden>
+      <strong data-session-chip-label></strong>
+      <span>{t('session.continueBar')}</span>
+    </a>
+    <nav class="nav" aria-label="Основное">
+      {
+        items.map((item) => (
+          <a href={item.href} aria-current={currentPath.includes(item.match) ? 'page' : undefined}>
+            {item.label}
+          </a>
+        ))
+      }
+    </nav>
+  </div>
+</header>

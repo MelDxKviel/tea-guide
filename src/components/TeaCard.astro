@@ -1,0 +1,17 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import TeaMark from './TeaMark.astro';
+import { teaPath } from '../lib/urls';
+
+interface Props {
+  tea: CollectionEntry<'teas'>;
+}
+
+const { tea } = Astro.props;
+---
+
+<a class="tea-card" href={teaPath(tea.data.slug)}>
+  <TeaMark accent={tea.data.accent} title={tea.data.names.ru} />
+  <h3>{tea.data.names.ru}</h3>
+  <p class="zh">{tea.data.names.zhHans} · {tea.data.names.pinyin}</p>
+</a>

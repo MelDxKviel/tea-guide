@@ -1,0 +1,100 @@
+---
+import { t, sourceCountLabel } from '../i18n';
+import { formatDuration } from '../lib/brewing/calculate';
+import type { BrewingRecipe } from '../lib/brewing/types';
+
+interface Props {
+  recipe: BrewingRecipe;
+  methodLabel: string;
+}
+
+const { recipe, methodLabel } = Astro.props;
+const sourceCount = recipe.sourceRefs.length;
+---
+
+<section class="recipe-panel" data-recipe-id={recipe.id}>
+  <p class="kicker">{methodLabel}</p>
+  <div class="recipe-panel__grid">
+    <div class="stat">
+      <dt>Лист / вода</dt>
+      <dd>{recipe.referenceLeafGrams} г / {recipe.referenceVolumeMl} мл</dd>
+    </div>
+    {
+      recipe.temperature && (
+        <div class="stat">
+          <dt>Температура</dt>
+          <dd>
+            {recipe.temperature.recommendedCelsius}°C
+            {recipe.temperature.minCelsius && recipe.temperature.maxCelsius ? (
+              <small class="meta-line">
+                {' '}
+                {t('brew.tempRange', {
+                  min: recipe.temperature.minCelsius,
+                  max: recipe.temperature.maxCelsius,
+                })}
+              </small>
+            ) : null}
+          </dd>
+        </div>
+      )
+    }
+    {
+      recipe.vessel && (
+        <div class="stat">
+          <dt>Посуда</dt>
+          <dd>{t(`brew.vessel.${recipe.vessel}`)}</dd>
+        </div>
+      )
+    }
+    {
+      recipe.durationSeconds && (
+        <div class="stat">
+          <dt>Время</dt>
+          <dd class="numeric">{formatDuration(recipe.durationSeconds)}</dd>
+        </div>
+      )
+    }
+  </div>
+
+  {
+    recipe.rinse && (
+      <p>
+        {t('timer.rinse')}: {recipe.rinse.durationSeconds} с
+        {recipe.rinse.optional ? ' · можно пропустить' : ''}
+        {recipe.rinse.note ? ` · ${recipe.rinse.note}` : ''}
+      </p>
+    )
+  }
+
+  {
+    recipe.infusions && recipe.infusions.length > 0 && (
+      <>
+        <p>{t('tea.infusions')}</p>
+        <ol class="infusion-list">
+          {recipe.infusions.map((item) => (
+            <li>
+              {item.number} — {item.durationSeconds} с
+            </li>
+          ))}
+        </ol>
+      </>
+    )
+  }
+
+  {
+    recipe.notes?.map((note) => (
+      <p class="meta-line">{note}</p>
+    ))
+  }
+
+  <details class="details">
+    <summary>{t('tea.recipeBySources')} · {sourceCountLabel(sourceCount)}</summary>
+    <ul>
+      {recipe.sourceRefs.map((ref) => (
+        <li>
+          <code>{ref.sourceId}</code>: {ref.supports.join(', ')}
+        </li>
+      ))}
+    </ul>
+  </details>
+</section>

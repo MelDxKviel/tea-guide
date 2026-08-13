@@ -1,0 +1,39 @@
+id: dong-ding-gongfu-gaiwan
+teaId: dong-ding
+method: gongfu
+vessel: gaiwan
+referenceVolumeMl: 110
+referenceLeafGrams: 7
+temperature:
+  recommendedCelsius: 100
+rinse:
+  durationSeconds: 5
+  optional: true
+infusions:
+  - number: 1
+    durationSeconds: 20
+  - number: 2
+    durationSeconds: 25
+  - number: 3
+    durationSeconds: 35
+  - number: 4
+    durationSeconds: 50
+  - number: 5
+    durationSeconds: 70
+  - number: 6
+    durationSeconds: 90
+sourceRefs:
+  - sourceId: tres-ws-5283
+    supports:
+      - temperature
+  - sourceId: teagraphy-tres
+    supports:
+      - temperature
+  - sourceId: fujian-daily-2022
+    supports:
+      - leaf_ratio
+  - sourceId: hanyitea-dongding
+    supports:
+      - infusion_times
+      - rinse
+confidence: medium

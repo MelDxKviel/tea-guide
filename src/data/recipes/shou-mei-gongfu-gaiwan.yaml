@@ -1,0 +1,34 @@
+id: shou-mei-gongfu-gaiwan
+teaId: shou-mei
+method: gongfu
+vessel: gaiwan
+referenceVolumeMl: 110
+referenceLeafGrams: 8
+temperature:
+  recommendedCelsius: 100
+rinse:
+  durationSeconds: 5
+  optional: true
+  note: Для выдержанного шоу мэй промывка уместнее.
+infusions:
+  - number: 1
+    durationSeconds: 30
+  - number: 2
+    durationSeconds: 20
+  - number: 3
+    durationSeconds: 25
+  - number: 4
+    durationSeconds: 35
+  - number: 5
+    durationSeconds: 50
+sourceRefs:
+  - sourceId: ipucha-white
+    supports:
+      - leaf_ratio
+      - temperature
+      - infusion_times
+      - rinse
+  - sourceId: caas-linzhi
+    supports:
+      - thermos_method
+confidence: medium

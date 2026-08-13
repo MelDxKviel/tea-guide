@@ -1,0 +1,23 @@
+id: dongting-bi-luo-chun-western
+teaId: dongting-bi-luo-chun
+method: western
+referenceVolumeMl: 150
+referenceLeafGrams: 3
+temperature:
+  recommendedCelsius: 85
+  minCelsius: 80
+  maxCelsius: 90
+durationSeconds: 150
+notes:
+  - Без крышки и без промывки.
+sourceRefs:
+  - sourceId: caas-linzhi
+    supports:
+      - western_method
+      - temperature
+      - leaf_ratio
+  - sourceId: people-health-tea
+    supports:
+      - temperature
+      - western_method
+confidence: high

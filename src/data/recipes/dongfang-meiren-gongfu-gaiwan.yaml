@@ -1,0 +1,31 @@
+id: dongfang-meiren-gongfu-gaiwan
+teaId: dongfang-meiren
+method: gongfu
+vessel: gaiwan
+referenceVolumeMl: 120
+referenceLeafGrams: 5
+temperature:
+  recommendedCelsius: 85
+  minCelsius: 80
+  maxCelsius: 90
+infusions:
+  - number: 1
+    durationSeconds: 45
+  - number: 2
+    durationSeconds: 35
+  - number: 3
+    durationSeconds: 40
+  - number: 4
+    durationSeconds: 55
+  - number: 5
+    durationSeconds: 75
+notes:
+  - "Тайваньская опытная станция: 80–90 °C лучше кипятка. Промывку обычно пропускают."
+sourceRefs:
+  - sourceId: tres-ws-5283
+    supports:
+      - temperature
+  - sourceId: teagraphy-tres
+    supports:
+      - temperature
+confidence: medium

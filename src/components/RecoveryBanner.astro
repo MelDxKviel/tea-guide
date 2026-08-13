@@ -1,0 +1,18 @@
+---
+import { t } from '../i18n';
+import { sessionPath } from '../lib/urls';
+---
+
+<div class="recovery" data-recovery hidden>
+  <div class="wrap recovery__inner">
+    <div>
+      <strong>{t('recovery.title')}</strong>
+      <div data-recovery-label></div>
+    </div>
+    <div class="btn-row">
+      <a class="btn" href={sessionPath()}>{t('recovery.continue')}</a>
+      <button class="btn btn--ghost" type="button" data-recovery-restart>{t('recovery.restart')}</button>
+      <button class="btn btn--ghost" type="button" data-recovery-dismiss>{t('recovery.dismiss')}</button>
+    </div>
+  </div>
+</div>

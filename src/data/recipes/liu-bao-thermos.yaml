@@ -1,0 +1,15 @@
+id: liu-bao-thermos
+teaId: liu-bao
+method: thermos
+referenceVolumeMl: 400
+referenceLeafGrams: 6
+temperature:
+  recommendedCelsius: 100
+durationSeconds: 900
+notes:
+  - Традиционный деревенский способ, не таблица из GB.
+sourceRefs:
+  - sourceId: caas-linzhi
+    supports:
+      - vessel
+confidence: medium

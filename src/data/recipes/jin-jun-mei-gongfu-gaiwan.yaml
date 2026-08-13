@@ -1,0 +1,43 @@
+id: jin-jun-mei-gongfu-gaiwan
+teaId: jin-jun-mei
+method: gongfu
+vessel: gaiwan
+referenceVolumeMl: 110
+referenceLeafGrams: 3.5
+temperature:
+  recommendedCelsius: 90
+  minCelsius: 80
+  maxCelsius: 90
+rinse:
+  durationSeconds: 3
+  optional: true
+infusions:
+  - number: 1
+    durationSeconds: 15
+  - number: 2
+    durationSeconds: 25
+  - number: 3
+    durationSeconds: 35
+  - number: 4
+    durationSeconds: 45
+  - number: 5
+    durationSeconds: 60
+  - number: 6
+    durationSeconds: 75
+  - number: 7
+    durationSeconds: 90
+notes:
+  - "Источники расходятся: 80–90 °C и 3 г против 100 °C и 5 г с мгновенными проливами."
+  - Взят более осторожный почечный вариант, чтобы не заварить кипятком вкрутую.
+sourceRefs:
+  - sourceId: baike-jinjunmei
+    supports:
+      - leaf_ratio
+      - temperature
+      - rinse
+      - infusion_times
+  - sourceId: manzao-jinjunmei
+    supports:
+      - leaf_ratio
+      - temperature
+confidence: medium

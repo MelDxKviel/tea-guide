@@ -1,0 +1,57 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import SearchBox from '../../components/SearchBox.astro';
+import TeaCard from '../../components/TeaCard.astro';
+import { t } from '../../i18n';
+import { allCategories, allTeas, subgroupsOf, teasByCategory, toSearchDocuments } from '../../lib/content/catalog';
+import { categoryPath, subgroupPath } from '../../lib/urls';
+
+const teas = await allTeas();
+const categories = await allCategories();
+const documents = toSearchDocuments(teas);
+const groups = await Promise.all(
+  categories.map(async (category) => ({
+    category,
+    subgroups: await subgroupsOf(category.data.id),
+    teas: await teasByCategory(category.data.id),
+  })),
+);
+---
+
+<BaseLayout
+  title="Каталог чая — Tea Guide"
+  description="Китайский чай по категориям: улуны, пуэры, красные, зелёные, белые, жёлтые и хэйча. У каждого чая свой рецепт проливов."
+>
+  <div class="wrap">
+    <Breadcrumbs items={[{ label: t('nav.teas') }]} />
+    <h1 class="page-title">{t('catalog.title')}</h1>
+    <p class="lead">{t('catalog.lead')}</p>
+    <SearchBox documents={documents} />
+
+    {
+      groups.map(({ category, subgroups, teas: items }) => (
+        <section class="section">
+          <h2>
+            <a href={categoryPath(category.data.slug)}>{category.data.title}</a>
+          </h2>
+          {subgroups.length > 0 && (
+            <p class="meta-line">
+              {subgroups.map((sub, index) => (
+                <>
+                  {index > 0 && ' · '}
+                  <a href={subgroupPath(category.data.slug, sub.data.slug)}>{sub.data.title}</a>
+                </>
+              ))}
+            </p>
+          )}
+          <div class="grid-cards">
+            {items.map((tea) => (
+              <TeaCard tea={tea} />
+            ))}
+          </div>
+        </section>
+      ))
+    }
+  </div>
+</BaseLayout>

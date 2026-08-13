@@ -1,0 +1,39 @@
+---
+import { render, type CollectionEntry } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Breadcrumbs from '../Breadcrumbs.astro';
+import TeaCard from '../TeaCard.astro';
+import { t } from '../../i18n';
+import { catalogPath, subgroupPath } from '../../lib/urls';
+
+interface Props {
+  category: CollectionEntry<'categories'>;
+  subgroups: CollectionEntry<'subgroups'>[];
+  teas: CollectionEntry<'teas'>[];
+}
+
+const { category, subgroups, teas } = Astro.props;
+const { Content } = await render(category);
+---
+
+<BaseLayout title={category.data.seo.title} description={category.data.seo.description} ogType="article">
+  <div class="wrap">
+    <Breadcrumbs items={[{ href: catalogPath(), label: t('nav.teas') }, { label: category.data.title }]} />
+    <h1 class="page-title">{category.data.title}</h1>
+    <div class="prose">
+      <Content />
+    </div>
+    {
+      subgroups.length > 0 && (
+        <nav class="cat-row" aria-label="Подкатегории">
+          {subgroups.map((item) => (
+            <a href={subgroupPath(category.data.slug, item.data.slug)}>{item.data.title}</a>
+          ))}
+        </nav>
+      )
+    }
+    <div class="grid-cards">
+      {teas.map((tea) => <TeaCard tea={tea} />)}
+    </div>
+  </div>
+</BaseLayout>

@@ -1,0 +1,15 @@
+---
+import { t } from '../i18n';
+import { catalogPath, guidePath, teawarePath } from '../lib/urls';
+---
+
+<footer class="site-footer">
+  <div class="wrap">
+    <nav class="footer-nav" aria-label="Подвал">
+      <a href={catalogPath()}>{t('nav.teas')}</a>
+      <a href={teawarePath()}>{t('nav.teaware')}</a>
+      <a href={guidePath()}>{t('nav.guides')}</a>
+    </nav>
+    <p>{t('footer.note')}</p>
+  </div>
+</footer>

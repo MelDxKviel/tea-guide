@@ -1,0 +1,30 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import { t } from '../../i18n';
+import { teawarePath } from '../../lib/urls';
+
+const items = (await getCollection('teaware')).sort((a, b) => a.data.sortOrder - b.data.sortOrder);
+---
+
+<BaseLayout
+  title="Посуда — Tea Guide"
+  description="Гайвань, исинский чайник и термос: что выбрать и как этим пользоваться для проливов."
+>
+  <div class="wrap">
+    <Breadcrumbs items={[{ label: t('nav.teaware') }]} />
+    <h1 class="page-title">{t('nav.teaware')}</h1>
+    <p class="lead">Для этого сайта достаточно трёх сосудов. Остальное — если уже хочется.</p>
+    <div class="grid-cards">
+      {
+        items.map((item) => (
+          <a class="tea-card" href={teawarePath(item.id)}>
+            <h2>{item.data.title}</h2>
+            <p>{item.data.description}</p>
+          </a>
+        ))
+      }
+    </div>
+  </div>
+</BaseLayout>

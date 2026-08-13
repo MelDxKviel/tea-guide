@@ -1,0 +1,33 @@
+id: bai-mu-dan-gongfu-gaiwan
+teaId: bai-mu-dan
+method: gongfu
+vessel: gaiwan
+referenceVolumeMl: 110
+referenceLeafGrams: 8
+temperature:
+  recommendedCelsius: 95
+  minCelsius: 90
+  maxCelsius: 95
+infusions:
+  - number: 1
+    durationSeconds: 20
+  - number: 2
+    durationSeconds: 15
+  - number: 3
+    durationSeconds: 20
+  - number: 4
+    durationSeconds: 25
+  - number: 5
+    durationSeconds: 35
+  - number: 6
+    durationSeconds: 50
+sourceRefs:
+  - sourceId: ipucha-white
+    supports:
+      - leaf_ratio
+      - temperature
+      - infusion_times
+  - sourceId: baike-fuding-white
+    supports:
+      - origin
+confidence: medium

@@ -1,0 +1,186 @@
+---
+import { getEntry, render, type CollectionEntry } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Breadcrumbs from '../Breadcrumbs.astro';
+import BrewSetup from '../BrewSetup.astro';
+import RecipePanel from '../RecipePanel.astro';
+import TeaCard from '../TeaCard.astro';
+import TeaMark from '../TeaMark.astro';
+import { methodLabel, t, vesselLabel } from '../../i18n';
+import { asRecipe, recipesForTea, teasByCategory } from '../../lib/content/catalog';
+import { catalogPath, categoryPath, guidePath, subgroupPath, teawarePath } from '../../lib/urls';
+
+interface Props {
+  tea: CollectionEntry<'teas'>;
+}
+
+const { tea } = Astro.props;
+const { Content } = await render(tea);
+const category = await getEntry('categories', tea.data.categoryId);
+const subgroup = tea.data.subgroupId ? await getEntry('subgroups', tea.data.subgroupId) : undefined;
+const recipeEntries = await recipesForTea(tea.data.id);
+const recipes = recipeEntries.map(asRecipe);
+const gongfu = recipes.filter((item) => item.method === 'gongfu');
+const other = recipes.filter((item) => item.method !== 'gongfu');
+const defaultGongfu = gongfu[0];
+const sources = (await Promise.all(tea.data.sources.map((id) => getEntry('sources', id)))).filter(
+  (item): item is NonNullable<typeof item> => Boolean(item),
+);
+const related = tea.data.relatedTeaIds
+  ? (await Promise.all(tea.data.relatedTeaIds.map((id) => getEntry('teas', id)))).filter(
+      (item): item is NonNullable<typeof item> => Boolean(item),
+    )
+  : (await teasByCategory(tea.data.categoryId)).filter((item) => item.data.id !== tea.data.id).slice(0, 3);
+const origin = [tea.data.origin.country, tea.data.origin.province, tea.data.origin.region, tea.data.origin.locality]
+  .filter(Boolean)
+  .join(' → ');
+---
+
+<BaseLayout title={tea.data.seo.title} description={tea.data.seo.description} ogType="article">
+  <div class="wrap">
+    <Breadcrumbs
+      items={[
+        { href: catalogPath(), label: t('nav.teas') },
+        ...(category ? [{ href: categoryPath(category.data.slug), label: category.data.shortTitle }] : []),
+        ...(subgroup && category
+          ? [{ href: subgroupPath(category.data.slug, subgroup.data.slug), label: subgroup.data.title }]
+          : []),
+        { label: tea.data.names.ru },
+      ]}
+    />
+
+    <article>
+      <header class="tea-hero">
+        <div>
+          <p class="kicker">
+            {category?.data.shortTitle}
+            {subgroup ? ` · ${subgroup.data.title}` : ''}
+            {tea.data.roasting?.displayLabel ? ` · ${tea.data.roasting.displayLabel}` : ''}
+          </p>
+          <h1 class="page-title">{tea.data.names.ru}</h1>
+          <p class="zh">{tea.data.names.zhHans} · {tea.data.names.pinyin}</p>
+          <p class="lead">{tea.data.lead}</p>
+          <div class="btn-row">
+            {
+              gongfu.length > 0 && (
+                <button class="btn" type="button" data-open-brew data-testid="open-brew">
+                  {t('tea.brewGongfu')}
+                </button>
+              )
+            }
+          </div>
+          {
+            defaultGongfu && (
+              <p class="meta-line">
+                {defaultGongfu.temperature ? `${defaultGongfu.temperature.recommendedCelsius}°C` : ''}
+                {defaultGongfu.vessel ? ` · ${vesselLabel(defaultGongfu.vessel)}` : ''}
+                {gongfu.some((item) => item.vessel === 'yixing') ? ` / ${vesselLabel('yixing')}` : ''}
+              </p>
+            )
+          }
+        </div>
+        <div class="tea-hero__visual" aria-hidden="true">
+          <TeaMark accent={tea.data.accent} title="" />
+        </div>
+      </header>
+
+      <h2>{t('tea.howTo')}</h2>
+      <p class="meta-line">{t('tea.baseRecipe')}</p>
+      <nav class="methods" aria-label={t('tea.howTo')}>
+        {gongfu.length > 0 && <a href="#method-gongfu">{t('tea.method.gongfu')}</a>}
+        {other.map((item) => <a href={`#method-${item.method}`}>{methodLabel(item.method)}</a>)}
+      </nav>
+
+      <div id="method-gongfu">
+        {
+          gongfu.map((recipe) => (
+            <RecipePanel recipe={recipe} methodLabel={methodLabel('gongfu')} />
+          ))
+        }
+        {
+          gongfu.length > 0 && (
+            <div class="btn-row">
+              <button class="btn" type="button" data-open-brew>
+                {t('tea.brewGongfu')}
+              </button>
+            </div>
+          )
+        }
+      </div>
+
+      {
+        other.map((recipe) => (
+          <div id={`method-${recipe.method}`}>
+            <RecipePanel recipe={recipe} methodLabel={methodLabel(recipe.method)} />
+          </div>
+        ))
+      }
+
+      {
+        defaultGongfu?.temperature && (
+          <details class="details">
+            <summary>{t('tea.noTempControl')}</summary>
+            <p>{t('tea.noTempControl.body')}</p>
+          </details>
+        )
+      }
+
+      <div class="prose">
+        <Content />
+      </div>
+
+      <section class="section">
+        <h2>{t('tea.origin')}</h2>
+        <p>{origin}</p>
+      </section>
+
+      <section class="section">
+        <h2>{t('tea.vessels')}</h2>
+        <p>
+          {(tea.data.recommendedVessels ?? ['gaiwan']).map((vessel, index) => (
+            <>
+              {index > 0 && ', '}
+              <a href={teawarePath(vessel)}>{vesselLabel(vessel)}</a>
+            </>
+          ))}
+          {' · '}
+          <a href={guidePath('gongfu')}>что такое проливы</a>
+        </p>
+      </section>
+
+      <section class="section">
+        <h2>{t('tea.sources')}</h2>
+        <ul class="sources">
+          {
+            sources.map((source) => (
+              <li>
+                <a href={source.data.url} rel="noopener noreferrer" target="_blank">
+                  {source.data.title}
+                </a>
+                <div class="meta-line">
+                  {source.data.publisher} · {source.data.language}
+                </div>
+              </li>
+            ))
+          }
+        </ul>
+      </section>
+
+      {
+        related.length > 0 && (
+          <section class="section">
+            <h2>{t('tea.related')}</h2>
+            <div class="grid-cards">
+              {related.map((item) => (
+                <TeaCard tea={item} />
+              ))}
+            </div>
+          </section>
+        )
+      }
+    </article>
+  </div>
+  {gongfu.length > 0 && (
+    <BrewSetup teaId={tea.data.id} teaSlug={tea.data.slug} teaName={tea.data.names.ru} recipes={recipes} />
+  )}
+</BaseLayout>

@@ -1,0 +1,29 @@
+---
+import { getCollection, render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import { t } from '../../i18n';
+import { teawarePath } from '../../lib/urls';
+
+export async function getStaticPaths() {
+  const items = await getCollection('teaware');
+  return items.map((item) => ({ params: { slug: item.id }, props: { item } }));
+}
+
+const { item } = Astro.props;
+const { Content } = await render(item);
+---
+
+<BaseLayout
+  title={item.data.seo?.title ?? `${item.data.title} — Tea Guide`}
+  description={item.data.seo?.description ?? item.data.description}
+  ogType="article"
+>
+  <div class="wrap">
+    <Breadcrumbs items={[{ href: teawarePath(), label: t('nav.teaware') }, { label: item.data.title }]} />
+    <article class="prose">
+      <h1 class="page-title">{item.data.title}</h1>
+      <Content />
+    </article>
+  </div>
+</BaseLayout>

@@ -1,0 +1,12 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { catalogPath, homePath } from '../lib/urls';
+---
+
+<BaseLayout title="Страница не найдена — Tea Guide" description="Такой страницы нет.">
+  <div class="wrap">
+    <h1 class="page-title">Нет такой страницы</h1>
+    <p class="lead">Возможно, адрес изменился. Чай от этого не испортился.</p>
+    <p><a href={homePath()}>На главную</a> · <a href={catalogPath()}>В каталог</a></p>
+  </div>
+</BaseLayout>

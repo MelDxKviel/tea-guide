@@ -1,0 +1,27 @@
+id: keemun-western
+teaId: keemun
+method: western
+referenceVolumeMl: 150
+referenceLeafGrams: 3
+temperature:
+  recommendedCelsius: 95
+  minCelsius: 90
+  maxCelsius: 100
+durationSeconds: 180
+notes:
+  - "Категорийный ориентир института чая: около 1:50, 3–5 минут."
+sourceRefs:
+  - sourceId: caas-linzhi
+    supports:
+      - leaf_ratio
+      - temperature
+      - western_method
+  - sourceId: gb-t-23776-2018
+    supports:
+      - leaf_ratio
+      - water_volume
+  - sourceId: chawh-keemun
+    supports:
+      - western_method
+      - temperature
+confidence: high

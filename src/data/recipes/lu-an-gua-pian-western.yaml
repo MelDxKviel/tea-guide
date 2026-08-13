@@ -1,0 +1,23 @@
+id: lu-an-gua-pian-western
+teaId: lu-an-gua-pian
+method: western
+referenceVolumeMl: 150
+referenceLeafGrams: 4
+temperature:
+  recommendedCelsius: 90
+  minCelsius: 85
+  maxCelsius: 95
+durationSeconds: 150
+notes:
+  - Без крышки и без промывки.
+sourceRefs:
+  - sourceId: caas-linzhi
+    supports:
+      - western_method
+      - temperature
+      - leaf_ratio
+  - sourceId: people-health-tea
+    supports:
+      - temperature
+      - western_method
+confidence: high

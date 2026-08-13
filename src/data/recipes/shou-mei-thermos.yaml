@@ -1,0 +1,15 @@
+id: shou-mei-thermos
+teaId: shou-mei
+method: thermos
+referenceVolumeMl: 400
+referenceLeafGrams: 8
+temperature:
+  recommendedCelsius: 100
+durationSeconds: 1200
+notes:
+  - Институт чая допускает термос для выдержанного белого, не для молодой серебряной иглы.
+sourceRefs:
+  - sourceId: caas-linzhi
+    supports:
+      - thermos_method
+confidence: medium

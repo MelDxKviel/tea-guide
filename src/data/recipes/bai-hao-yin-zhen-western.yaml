@@ -1,0 +1,19 @@
+id: bai-hao-yin-zhen-western
+teaId: bai-hao-yin-zhen
+method: western
+referenceVolumeMl: 150
+referenceLeafGrams: 3
+temperature:
+  recommendedCelsius: 90
+  minCelsius: 85
+  maxCelsius: 90
+durationSeconds: 150
+sourceRefs:
+  - sourceId: caas-linzhi
+    supports:
+      - western_method
+      - temperature
+  - sourceId: rednet-brew
+    supports:
+      - temperature
+confidence: medium

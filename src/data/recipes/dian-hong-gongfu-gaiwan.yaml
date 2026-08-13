@@ -1,0 +1,36 @@
+id: dian-hong-gongfu-gaiwan
+teaId: dian-hong
+method: gongfu
+vessel: gaiwan
+referenceVolumeMl: 110
+referenceLeafGrams: 6
+temperature:
+  recommendedCelsius: 95
+  minCelsius: 90
+  maxCelsius: 100
+infusions:
+  - number: 1
+    durationSeconds: 12
+  - number: 2
+    durationSeconds: 18
+  - number: 3
+    durationSeconds: 25
+  - number: 4
+    durationSeconds: 35
+  - number: 5
+    durationSeconds: 50
+  - number: 6
+    durationSeconds: 70
+notes:
+  - "Крупный юньнаньский лист: закладка чуть больше, чем у цимэня."
+sourceRefs:
+  - sourceId: fujian-daily-2022
+    supports:
+      - leaf_ratio
+  - sourceId: caas-linzhi
+    supports:
+      - temperature
+  - sourceId: gb-t-13738-2
+    supports:
+      - origin
+confidence: medium

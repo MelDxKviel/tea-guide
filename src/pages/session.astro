@@ -1,0 +1,16 @@
+---
+import TimerLayout from '../layouts/TimerLayout.astro';
+import { getCollection } from 'astro:content';
+
+const recipes = await getCollection('recipes');
+const map = Object.fromEntries(recipes.map((entry) => [entry.data.id, entry.data]));
+---
+
+<TimerLayout title="Чаепитие — Tea Guide" description="Таймер проливов">
+  <div id="timer-root"></div>
+  <script type="application/json" id="recipes-data" set:html={JSON.stringify(map)} />
+  <script>
+    import { mountTimerApp } from '../scripts/timer-app';
+    mountTimerApp();
+  </script>
+</TimerLayout>

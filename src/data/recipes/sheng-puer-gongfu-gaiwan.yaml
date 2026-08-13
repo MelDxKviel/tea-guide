@@ -1,0 +1,46 @@
+id: sheng-puer-gongfu-gaiwan
+teaId: sheng-puer
+method: gongfu
+vessel: gaiwan
+referenceVolumeMl: 120
+referenceLeafGrams: 8
+temperature:
+  recommendedCelsius: 95
+  minCelsius: 90
+  maxCelsius: 100
+rinse:
+  durationSeconds: 5
+  optional: false
+  note: Разбудить прессовку и смыть пыль.
+infusions:
+  - number: 1
+    durationSeconds: 10
+  - number: 2
+    durationSeconds: 12
+  - number: 3
+    durationSeconds: 15
+  - number: 4
+    durationSeconds: 20
+  - number: 5
+    durationSeconds: 25
+  - number: 6
+    durationSeconds: 35
+  - number: 7
+    durationSeconds: 50
+  - number: 8
+    durationSeconds: 70
+extension:
+  initialSeconds: 100
+  incrementSeconds: 30
+notes:
+  - Базовый профиль категории, не конкретная фабрика и год. Источники расходятся по 90 vs 100 °C.
+sourceRefs:
+  - sourceId: gb-t-22111-2008
+    supports:
+      - origin
+  - sourceId: sohu-puer
+    supports:
+      - leaf_ratio
+      - temperature
+      - rinse
+confidence: medium

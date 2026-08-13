@@ -1,0 +1,72 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import SearchBox from '../components/SearchBox.astro';
+import TeaCard from '../components/TeaCard.astro';
+import { t } from '../i18n';
+import { allCategories, allTeas, featuredTeaIds, toSearchDocuments } from '../lib/content/catalog';
+import { catalogPath, categoryPath } from '../lib/urls';
+
+const teas = await allTeas();
+const categories = await allCategories();
+const featured = featuredTeaIds
+  .map((id) => teas.find((tea) => tea.data.id === id))
+  .filter((tea): tea is (typeof teas)[number] => Boolean(tea));
+const documents = toSearchDocuments(teas);
+---
+
+<BaseLayout
+  title="Tea Guide — как заваривать китайский чай проливами"
+  description="Выберите чай, укажите объём — сайт посчитает граммовку и проведёт через промывку и все проливы."
+  jsonLd={{
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: 'Tea Guide',
+    inLanguage: 'ru',
+    url: Astro.site?.href,
+  }}
+>
+  <div class="wrap">
+    <p class="kicker">{t('site.name')}</p>
+    <h1 class="page-title">{t('site.tagline')}</h1>
+    <SearchBox documents={documents} />
+
+    <nav class="cat-row" aria-label="Категории">
+      {categories.map((category) => <a href={categoryPath(category.data.slug)}>{category.data.shortTitle}</a>)}
+    </nav>
+
+    <section class="section" data-recent-home hidden>
+      <h2>{t('home.recent')}</h2>
+      <div class="grid-cards" data-recent-list></div>
+    </section>
+
+    <section class="section">
+      <h2>{t('home.frequent')}</h2>
+      <div class="grid-cards">
+        {featured.map((tea) => <TeaCard tea={tea} />)}
+      </div>
+      <p style="margin-top:1.2rem">
+        <a href={catalogPath()}>{t('home.browse')}</a>
+      </p>
+    </section>
+  </div>
+  <script>
+    import { t } from '../i18n';
+    import { loadRecent } from '../lib/storage/recent';
+    import { teaPath } from '../lib/urls';
+
+    const box = document.querySelector('[data-recent-home]');
+    const list = document.querySelector('[data-recent-list]');
+    if (box && list) {
+      const items = loadRecent();
+      if (items.length > 0) {
+        box.removeAttribute('hidden');
+        list.innerHTML = items
+          .map((item) => {
+            const vessel = item.vessel ? ` · ${item.vessel === 'yixing' ? 'исин' : 'гайвань'}` : '';
+            return `<a class="tea-card" href="${teaPath(item.slug)}"><h3>${item.name}</h3><p>${item.volumeMl} мл${vessel}</p><span>${t('home.brewAgain')}</span></a>`;
+          })
+          .join('');
+      }
+    }
+  </script>
+</BaseLayout>
