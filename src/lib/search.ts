@@ -31,6 +31,30 @@ function haystacks(doc: SearchDocument): string[] {
   return [doc.nameRu, doc.nameZh, doc.pinyin, ...doc.aliases].map(normalizeSearch).filter(Boolean);
 }
 
+export function highlightMatch(text: string, query: string): string {
+  const q = query.trim();
+  if (!q) return escapeHtml(text);
+  const lowerText = text.toLocaleLowerCase('ru-RU');
+  const lowerQuery = q.toLocaleLowerCase('ru-RU');
+  const index = lowerText.indexOf(lowerQuery);
+  if (index >= 0) {
+    const end = index + q.length;
+    return `${escapeHtml(text.slice(0, index))}<mark>${escapeHtml(text.slice(index, end))}</mark>${escapeHtml(text.slice(end))}`;
+  }
+  if (normalizeSearch(text).includes(normalizeSearch(q))) {
+    return `<mark>${escapeHtml(text)}</mark>`;
+  }
+  return escapeHtml(text);
+}
+
+function escapeHtml(value: string): string {
+  return value
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;');
+}
+
 export function searchTeas(docs: SearchDocument[], query: string, limit = 8): SearchHit[] {
   const q = normalizeSearch(query);
   if (!q) return [];

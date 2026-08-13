@@ -28,6 +28,7 @@ pnpm-debug.log*
 Thumbs.db
 
 # tests
+docs/screens/
 coverage/
 playwright-report/
 test-results/

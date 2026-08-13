@@ -11,15 +11,25 @@ const { documents } = Astro.props;
 
 <div class="search" data-search>
   <label class="visually-hidden" for="tea-search">{t('search.label')}</label>
-  <input
-    id="tea-search"
-    type="search"
-    placeholder={t('search.placeholder')}
-    autocomplete="off"
-    enterkeyhint="search"
-    data-search-input
-  />
-  <div class="search__results" data-search-results hidden></div>
+  <div class="search__field">
+    <svg class="search__icon" viewBox="0 0 24 24" aria-hidden="true">
+      <circle cx="10.5" cy="10.5" r="6" fill="none" stroke="currentColor" stroke-width="1.7"></circle>
+      <path d="M15.2 15.2 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"></path>
+    </svg>
+    <input
+      id="tea-search"
+      type="search"
+      placeholder={t('search.placeholder')}
+      autocomplete="off"
+      enterkeyhint="search"
+      role="combobox"
+      aria-autocomplete="list"
+      aria-expanded="false"
+      aria-controls="tea-search-results"
+      data-search-input
+    />
+  </div>
+  <div class="search__results" id="tea-search-results" role="listbox" data-search-results hidden></div>
   <script type="application/json" data-search-index set:html={JSON.stringify(documents)} />
 </div>
 <script>

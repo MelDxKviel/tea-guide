@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { searchTeas, type SearchDocument } from '../../src/lib/search';
+import { highlightMatch, searchTeas, type SearchDocument } from '../../src/lib/search';
 
 const docs: SearchDocument[] = [
   {
@@ -33,5 +33,9 @@ describe('search', () => {
 
   it('is tolerant of case and spaces', () => {
     expect(searchTeas(docs, 'ТЕ  гуань')[0]?.id).toBe('tie-guan-yin');
+  });
+
+  it('highlights the matched fragment', () => {
+    expect(highlightMatch('Да Хун Пао', 'хун')).toContain('<mark>Хун</mark>');
   });
 });

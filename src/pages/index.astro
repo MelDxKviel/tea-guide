@@ -27,11 +27,16 @@ const documents = toSearchDocuments(teas);
 >
   <div class="wrap">
     <p class="kicker">{t('site.name')}</p>
-    <h1 class="page-title">{t('site.tagline')}</h1>
+    <h1 class="page-title page-title--home">{t('site.tagline')}</h1>
+    <p class="home-sub">{t('site.subtitle')}</p>
     <SearchBox documents={documents} />
 
     <nav class="cat-row" aria-label="Категории">
-      {categories.map((category) => <a href={categoryPath(category.data.slug)}>{category.data.shortTitle}</a>)}
+      {categories.map((category) => (
+        <a class="chip" href={categoryPath(category.data.slug)}>
+          {category.data.shortTitle}
+        </a>
+      ))}
     </nav>
 
     <section class="section" data-recent-home hidden>
@@ -41,7 +46,7 @@ const documents = toSearchDocuments(teas);
 
     <section class="section">
       <h2>{t('home.frequent')}</h2>
-      <div class="grid-cards">
+      <div class="grid-cards grid-cards--featured">
         {featured.map((tea) => <TeaCard tea={tea} />)}
       </div>
       <p style="margin-top:1.2rem">

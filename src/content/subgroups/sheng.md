@@ -2,7 +2,7 @@
 id: sheng
 slug: sheng
 categoryId: puer
-title: Шэн пуэр
+title: Шэн
 region: Юньнань
 sortOrder: 1
 seo:

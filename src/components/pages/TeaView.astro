@@ -22,7 +22,14 @@ const recipeEntries = await recipesForTea(tea.data.id);
 const recipes = recipeEntries.map(asRecipe);
 const gongfu = recipes.filter((item) => item.method === 'gongfu');
 const other = recipes.filter((item) => item.method !== 'gongfu');
-const defaultGongfu = gongfu[0];
+const defaultGongfu = gongfu.find((item) => item.vessel === 'gaiwan') ?? gongfu[0];
+const yixingGongfu = gongfu.find((item) => item.vessel === 'yixing');
+const sameGongfu =
+  Boolean(yixingGongfu) &&
+  defaultGongfu &&
+  defaultGongfu.referenceLeafGrams === yixingGongfu?.referenceLeafGrams &&
+  defaultGongfu.referenceVolumeMl === yixingGongfu.referenceVolumeMl &&
+  JSON.stringify(defaultGongfu.infusions) === JSON.stringify(yixingGongfu.infusions);
 const sources = (await Promise.all(tea.data.sources.map((id) => getEntry('sources', id)))).filter(
   (item): item is NonNullable<typeof item> => Boolean(item),
 );
@@ -79,9 +86,15 @@ const origin = [tea.data.origin.country, tea.data.origin.province, tea.data.orig
             )
           }
         </div>
-        <div class="tea-hero__visual" aria-hidden="true">
-          <TeaMark accent={tea.data.accent} title="" />
-        </div>
+        <figure class="tea-hero__visual">
+          <TeaMark
+            teaId={tea.data.id}
+            accent={tea.data.accent}
+            title={tea.data.names.ru}
+            zh={tea.data.names.zhHans}
+            variant="hero"
+          />
+        </figure>
       </header>
 
       <section class="tool-block" aria-labelledby="brew-tools-title">
@@ -95,11 +108,43 @@ const origin = [tea.data.origin.country, tea.data.origin.province, tea.data.orig
           {other.map((item) => <a href={`#method-${item.method}`}>{methodLabel(item.method)}</a>)}
         </nav>
 
-        <div id="method-gongfu">
+        <div id="method-gongfu" class="vessel-switch">
           {
-            gongfu.map((recipe) => (
-              <RecipePanel recipe={recipe} methodLabel={methodLabel('gongfu')} />
-            ))
+            defaultGongfu && yixingGongfu && (
+              <>
+                <p class="visually-hidden" id="vessel-switch-label">
+                  {t('tea.vesselSwitch')}
+                </p>
+                <input type="radio" name="gongfu-vessel" id="vessel-gaiwan" checked />
+                <input type="radio" name="gongfu-vessel" id="vessel-yixing" />
+                <div class="choice-row vessel-switch__tabs">
+                  <label class="choice" for="vessel-gaiwan">
+                    {vesselLabel('gaiwan')}
+                  </label>
+                  <label class="choice" for="vessel-yixing">
+                    {vesselLabel('yixing')}
+                  </label>
+                </div>
+              </>
+            )
+          }
+          {
+            defaultGongfu && (
+              <div class="vessel-switch__panel" data-for="gaiwan">
+                <RecipePanel recipe={defaultGongfu} methodLabel={methodLabel('gongfu')} />
+              </div>
+            )
+          }
+          {
+            yixingGongfu && (
+              <div class="vessel-switch__panel" data-for="yixing">
+                <RecipePanel
+                  recipe={yixingGongfu}
+                  methodLabel={methodLabel('gongfu')}
+                  note={sameGongfu ? t('tea.sameAsGaiwan') : undefined}
+                />
+              </div>
+            )
           }
           {
             gongfu.length > 0 && (

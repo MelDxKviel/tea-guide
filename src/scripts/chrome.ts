@@ -1,6 +1,6 @@
 import { t } from '../i18n';
 import { applySync } from '../lib/brewing/session';
-import { isSessionActive, loadSession } from '../lib/storage/session';
+import { dismissRecovery, isRecoveryDismissed, isSessionActive, loadSession } from '../lib/storage/session';
 import { sessionPath, teaPath } from '../lib/urls';
 
 export function hydrateChrome(): void {
@@ -29,12 +29,13 @@ export function hydrateChrome(): void {
   }
 
   const onSessionPage = location.pathname.replace(/\/+$/, '').endsWith('/session');
-  if (recovery && !onSessionPage) {
+  if (recovery && !onSessionPage && !isRecoveryDismissed(synced)) {
     const recLabel = recovery.querySelector('[data-recovery-label]');
     if (recLabel) recLabel.textContent = label;
     recovery.hidden = false;
     recovery.classList.add('is-visible');
     recovery.querySelector('[data-recovery-dismiss]')?.addEventListener('click', () => {
+      dismissRecovery(synced);
       recovery.hidden = true;
       recovery.classList.remove('is-visible');
     });

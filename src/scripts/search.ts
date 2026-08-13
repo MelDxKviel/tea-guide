@@ -1,4 +1,4 @@
-import { searchTeas, type SearchDocument } from '../lib/search';
+import { highlightMatch, searchTeas, type SearchDocument } from '../lib/search';
 import { teaPath } from '../lib/urls';
 
 export function mountSearch(): void {
@@ -18,47 +18,75 @@ export function mountSearch(): void {
 
   let active = -1;
 
-  const render = (): void => {
-    const hits = searchTeas(docs, input.value, 8);
+  const close = (): void => {
+    panel.hidden = true;
+    panel.classList.remove('is-open');
+    input.setAttribute('aria-expanded', 'false');
     active = -1;
-    if (!input.value.trim() || hits.length === 0) {
-      panel.hidden = hits.length === 0 && Boolean(input.value.trim()) ? false : true;
-      panel.classList.toggle('is-open', Boolean(input.value.trim()));
-      panel.innerHTML = input.value.trim() ? '<p>Ничего не нашлось</p>' : '';
+  };
+
+  const paintActive = (): void => {
+    const links = [...panel.querySelectorAll<HTMLAnchorElement>('a')];
+    links.forEach((link, index) => {
+      const on = index === active;
+      link.setAttribute('aria-selected', String(on));
+      link.classList.toggle('is-active', on);
+    });
+    links[active]?.scrollIntoView({ block: 'nearest' });
+  };
+
+  const render = (): void => {
+    const query = input.value;
+    const hits = searchTeas(docs, query, 8);
+    active = -1;
+    if (!query.trim()) {
+      close();
+      panel.innerHTML = '';
       return;
     }
     panel.hidden = false;
     panel.classList.add('is-open');
+    input.setAttribute('aria-expanded', 'true');
+    if (hits.length === 0) {
+      panel.innerHTML = `<p class="search__empty" role="status">Ничего не нашлось</p>`;
+      return;
+    }
     panel.innerHTML = hits
-      .map(
-        (hit, index) =>
-          `<a href="${teaPath(hit.slug)}" data-index="${index}"><strong>${hit.nameRu}</strong> · ${hit.nameZh}</a>`,
-      )
+      .map((hit, index) => {
+        const name = highlightMatch(hit.nameRu, query);
+        return `<a href="${teaPath(hit.slug)}" id="search-opt-${index}" role="option" data-index="${index}"><span>${name}</span><small>${hit.nameZh} · ${hit.pinyin}</small></a>`;
+      })
       .join('');
   };
 
   input.addEventListener('input', render);
   input.addEventListener('keydown', (event) => {
-    const links = [...panel.querySelectorAll('a')];
-    if (event.key === 'ArrowDown') {
+    const links = [...panel.querySelectorAll<HTMLAnchorElement>('a')];
+    if (event.key === 'Escape') {
       event.preventDefault();
-      active = Math.min(links.length - 1, active + 1);
-    } else if (event.key === 'ArrowUp') {
-      event.preventDefault();
-      active = Math.max(0, active - 1);
-    } else if (event.key === 'Enter' && active >= 0 && links[active]) {
-      event.preventDefault();
-      links[active].click();
-    } else {
+      close();
       return;
     }
-    links.forEach((link, index) => link.setAttribute('aria-selected', String(index === active)));
+    if (event.key === 'ArrowDown') {
+      event.preventDefault();
+      if (panel.hidden) render();
+      active = Math.min(links.length - 1, active + 1);
+      paintActive();
+      return;
+    }
+    if (event.key === 'ArrowUp') {
+      event.preventDefault();
+      active = Math.max(0, active - 1);
+      paintActive();
+      return;
+    }
+    if (event.key === 'Enter' && active >= 0 && links[active]) {
+      event.preventDefault();
+      links[active].click();
+    }
   });
 
   document.addEventListener('click', (event) => {
-    if (!root.contains(event.target as Node)) {
-      panel.hidden = true;
-      panel.classList.remove('is-open');
-    }
+    if (!root.contains(event.target as Node)) close();
   });
 }

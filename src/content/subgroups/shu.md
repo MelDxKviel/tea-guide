@@ -2,7 +2,7 @@
 id: shu
 slug: shu
 categoryId: puer
-title: Шу пуэр
+title: Шу
 region: Юньнань
 sortOrder: 2
 seo:

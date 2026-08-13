@@ -1,6 +1,7 @@
 export const ru = {
   'site.name': 'Tea Guide',
   'site.tagline': 'Какой чай завариваем?',
+  'site.subtitle': 'Найдите чай и получите точную последовательность проливов',
   'nav.teas': 'Чаи',
   'nav.teaware': 'Посуда',
   'nav.guides': 'О чае',
@@ -37,6 +38,8 @@ export const ru = {
   'tea.recipeSourcesCount.one': '{n} источник',
   'tea.recipeSourcesCount.many': '{n} источников',
   'tea.baseRecipe': 'Базовый рецепт',
+  'tea.sameAsGaiwan': 'Секунды те же, что у гайвани. Отличается только сосуд.',
+  'tea.vesselSwitch': 'Посуда для рецепта',
   'tea.infusions': 'Проливы',
   'tea.noTempControl': 'Нет регулировки температуры?',
   'tea.noTempControl.body':

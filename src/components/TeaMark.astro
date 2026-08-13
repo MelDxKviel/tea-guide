@@ -1,20 +1,195 @@
 ---
+import { teaMarkCaption, teaMarkKind, type TeaMarkKind } from '../lib/tea-mark';
+
 interface Props {
+  teaId: string;
   accent?: string;
   title: string;
+  zh?: string;
+  variant?: 'card' | 'hero';
 }
 
-const { accent = '#1d4536', title } = Astro.props;
+const { teaId, accent = '#1d4536', title, zh, variant = 'card' } = Astro.props;
+const kind = teaMarkKind(teaId);
+const caption = teaMarkCaption(kind);
+const ink = 'rgba(243,236,223,.82)';
+const inkSoft = 'rgba(243,236,223,.45)';
+const view = variant === 'hero' ? '0 0 320 220' : '0 0 320 110';
+
+function leaf(kind: TeaMarkKind) {
+  switch (kind) {
+    case 'wuyi-strip':
+      return `<g fill="none" stroke="${ink}" stroke-width="2.2" stroke-linecap="round">
+        <path d="M40 78c18-38 34-54 78-58"/>
+        <path d="M72 86c22-32 48-48 96-44"/>
+        <path d="M118 92c16-28 42-40 86-36"/>
+        <path d="M168 88c14-22 36-32 72-24"/>
+      </g>`;
+    case 'rolled':
+      return `<g fill="none" stroke="${ink}" stroke-width="2">
+        <circle cx="78" cy="58" r="16"/><circle cx="78" cy="58" r="7"/>
+        <circle cx="132" cy="46" r="18"/><circle cx="132" cy="46" r="8"/>
+        <circle cx="186" cy="62" r="15"/><circle cx="186" cy="62" r="6"/>
+        <circle cx="234" cy="50" r="17"/><circle cx="234" cy="50" r="7"/>
+      </g>`;
+    case 'phoenix':
+      return `<g fill="none" stroke="${ink}" stroke-width="2" stroke-linecap="round">
+        <path d="M28 86c40-8 70-48 92-62 18 22 8 52-6 64"/>
+        <path d="M108 88c44-10 78-52 102-66 16 20 6 50-8 62"/>
+        <path d="M188 90c36-8 64-40 84-56"/>
+      </g>`;
+    case 'taiwan-ball':
+      return `<g fill="none" stroke="${ink}" stroke-width="2">
+        <path d="M70 70a20 16 0 1 1 40 0v4H70z"/>
+        <path d="M132 58a22 18 0 1 1 44 0v6h-44z"/>
+        <path d="M200 68a18 14 0 1 1 36 0v4h-36z"/>
+      </g>`;
+    case 'bug-bitten':
+      return `<g fill="none" stroke="${ink}" stroke-width="1.8">
+        <ellipse cx="90" cy="58" rx="28" ry="16" transform="rotate(-18 90 58)"/>
+        <ellipse cx="160" cy="50" rx="26" ry="15" transform="rotate(12 160 50)"/>
+        <ellipse cx="228" cy="62" rx="24" ry="14" transform="rotate(-8 228 62)"/>
+        <circle cx="78" cy="50" r="3" fill="${inkSoft}" stroke="none"/>
+        <circle cx="172" cy="44" r="3" fill="${inkSoft}" stroke="none"/>
+        <circle cx="240" cy="56" r="2.5" fill="${inkSoft}" stroke="none"/>
+      </g>`;
+    case 'red-wire':
+      return `<g fill="none" stroke="${ink}" stroke-width="1.6" stroke-linecap="round">
+        <path d="M36 70c40-30 50 18 90-8 30-18 40 16 80-6 28-16 40 14 70 4"/>
+        <path d="M44 84c36-22 48 14 86-4 32-16 44 12 78 0"/>
+      </g>`;
+    case 'smoked':
+      return `<g fill="none" stroke="${ink}" stroke-width="2" stroke-linecap="round">
+        <path d="M48 82c12-40 8-52 4-62"/>
+        <path d="M88 86c10-36 18-58 8-68"/>
+        <path d="M132 84c14-38 6-56 16-66"/>
+        <path d="M176 88c8-34 20-54 10-64"/>
+        <path d="M220 82c12-32 8-50 18-60"/>
+      </g>`;
+    case 'golden-tip':
+      return `<g fill="none" stroke="${ink}" stroke-width="2.1" stroke-linecap="round">
+        <path d="M50 86c10-36 28-58 58-62"/>
+        <path d="M110 90c16-40 40-56 74-52"/>
+        <path d="M184 88c14-32 38-48 70-40"/>
+        <circle cx="108" cy="40" r="2" fill="${ink}" stroke="none"/>
+        <circle cx="196" cy="46" r="2" fill="${ink}" stroke="none"/>
+        <circle cx="248" cy="52" r="1.8" fill="${ink}" stroke="none"/>
+      </g>`;
+    case 'bud-needles':
+      return `<g stroke="${ink}" stroke-width="1.7" stroke-linecap="round">
+        <path d="M70 88l8-52"/><path d="M88 90l4-56"/><path d="M104 88l10-50"/>
+        <path d="M128 90l6-54"/><path d="M146 88l-2-52"/><path d="M164 90l8-50"/>
+        <path d="M186 88l4-54"/><path d="M204 90l10-48"/><path d="M226 88l2-52"/>
+      </g>`;
+    case 'flat-spear':
+      return `<g fill="none" stroke="${ink}" stroke-width="2">
+        <path d="M48 74h70l-8-22H56z"/><path d="M128 62h74l-10-24h-54z"/>
+        <path d="M80 88h78l-8-18H88z"/>
+      </g>`;
+    case 'spiral':
+      return `<g fill="none" stroke="${ink}" stroke-width="1.8">
+        <path d="M70 58c0-12 10-18 18-14 6 3 4 12-2 14-4 1-8-2-7-6"/>
+        <path d="M126 48c0-14 12-20 22-15 8 4 5 14-3 16-5 1-9-3-8-7"/>
+        <path d="M186 62c0-12 9-17 17-13 6 3 4 11-2 13-4 1-7-2-6-6"/>
+        <path d="M236 50c0-13 11-19 20-14 7 4 4 13-2 15-5 1-8-2-7-6"/>
+      </g>`;
+    case 'hairy-spear':
+      return `<g fill="none" stroke="${ink}" stroke-width="1.7" stroke-linecap="round">
+        <path d="M60 86c8-34 18-56 28-64"/>
+        <path d="M96 88c6-32 22-54 36-62"/>
+        <path d="M148 86c10-30 24-52 40-58"/>
+        <path d="M208 88c8-28 20-50 34-56"/>
+        <path d="M72 40l6-10M108 36l8-10M164 38l7-9M224 40l8-10" stroke-width="1.2"/>
+      </g>`;
+    case 'seed-leaf':
+      return `<g fill="none" stroke="${ink}" stroke-width="2">
+        <ellipse cx="86" cy="58" rx="22" ry="14"/>
+        <ellipse cx="148" cy="50" rx="24" ry="15"/>
+        <ellipse cx="212" cy="60" rx="21" ry="13"/>
+      </g>`;
+    case 'green-needle':
+      return `<g stroke="${ink}" stroke-width="1.8" stroke-linecap="round" fill="none">
+        <path d="M64 86c6-40 10-58 8-68"/><path d="M96 88c4-38 14-56 18-66"/>
+        <path d="M132 86c8-36 8-58 4-66"/><path d="M168 88c6-40 16-54 20-64"/>
+        <path d="M208 86c4-38 10-56 14-66"/>
+      </g>`;
+    case 'steam-needle':
+      return `<g stroke="${ink}" stroke-width="2" stroke-linecap="round" fill="none">
+        <path d="M80 88V28"/><path d="M112 88V24"/><path d="M144 88V30"/>
+        <path d="M176 88V22"/><path d="M208 88V28"/><path d="M240 88V26"/>
+      </g>`;
+    case 'silver-needle':
+      return `<g stroke="${ink}" stroke-width="1.8" stroke-linecap="round" fill="none">
+        <path d="M90 90V26"/><path d="M118 90V22"/><path d="M146 90V28"/>
+        <path d="M174 90V20"/><path d="M202 90V26"/><path d="M230 90V24"/>
+        <circle cx="90" cy="24" r="2.2" fill="${ink}" stroke="none"/>
+        <circle cx="118" cy="20" r="2.2" fill="${ink}" stroke="none"/>
+        <circle cx="146" cy="26" r="2.2" fill="${ink}" stroke="none"/>
+        <circle cx="174" cy="18" r="2.2" fill="${ink}" stroke="none"/>
+        <circle cx="202" cy="24" r="2.2" fill="${ink}" stroke="none"/>
+        <circle cx="230" cy="22" r="2.2" fill="${ink}" stroke="none"/>
+      </g>`;
+    case 'peony':
+      return `<g fill="none" stroke="${ink}" stroke-width="1.8">
+        <path d="M70 78c8-28 24-46 48-50 10 16 4 40-10 52"/>
+        <path d="M150 72c12-30 32-44 58-42 8 18 0 38-14 50"/>
+        <path d="M98 40c6-10 16-14 24-8" />
+        <path d="M188 38c6-10 14-12 22-6"/>
+      </g>`;
+    case 'coarse-white':
+      return `<g fill="none" stroke="${ink}" stroke-width="2">
+        <path d="M48 70c20-28 50-36 78-18-8 22-30 32-54 28z"/>
+        <path d="M140 58c24-24 56-28 82-8-10 20-34 30-60 24z"/>
+        <path d="M86 88c16-16 40-18 58-4-6 14-24 18-42 14z"/>
+      </g>`;
+    case 'sheng-cake':
+      return `<g fill="none" stroke="${ink}" stroke-width="2">
+        <ellipse cx="160" cy="58" rx="78" ry="28"/>
+        <ellipse cx="160" cy="58" rx="18" ry="7"/>
+        <path d="M90 48c20 10 50 16 70 16s50-6 70-16" stroke="${inkSoft}"/>
+      </g>`;
+    case 'shu-cake':
+      return `<g fill="none" stroke="${ink}" stroke-width="2">
+        <path d="M70 42l110-16 70 28-108 34z"/>
+        <path d="M70 42v18l72 36 108-34v-18"/>
+        <path d="M180 26v18"/>
+      </g>`;
+    case 'brick':
+      return `<g fill="none" stroke="${ink}" stroke-width="2">
+        <rect x="70" y="38" width="180" height="48" rx="2"/>
+        <path d="M70 54h180M70 70h180M130 38v48M190 38v48"/>
+      </g>`;
+    case 'yellow-needle':
+      return `<g stroke="${ink}" stroke-width="1.8" stroke-linecap="round" fill="none">
+        <path d="M100 88V30"/><path d="M128 90V24"/><path d="M156 88V28"/>
+        <path d="M184 90V22"/><path d="M212 88V30"/>
+        <path d="M100 30c8-10 16-10 24 0" stroke="${inkSoft}"/>
+        <path d="M156 28c8-10 16-10 24 0" stroke="${inkSoft}"/>
+      </g>`;
+  }
+}
 ---
 
-<svg class="tea-card__mark" viewBox="0 0 320 90" role="img" aria-hidden="true">
-  <title>{title}</title>
-  <rect width="320" height="90" fill={accent} />
-  <path
-    d="M36 62c18-28 38-40 70-40 24 0 36 10 52 10 22 0 38-16 62-16 28 0 48 18 64 34"
-    fill="none"
-    stroke="rgba(243,236,223,.55)"
-    stroke-width="2"
-  />
-  <circle cx="268" cy="28" r="10" fill="none" stroke="rgba(243,236,223,.7)" stroke-width="1.5" />
+<svg
+  class:list={['tea-mark', variant === 'hero' && 'tea-mark--hero']}
+  viewBox={view}
+  role="img"
+  aria-label={`${title}. ${caption}`}
+>
+  <title>{title}. {caption}</title>
+  <rect width="320" height={variant === 'hero' ? 220 : 110} fill={accent} />
+  <g transform={variant === 'hero' ? 'translate(0 48)' : undefined} set:html={leaf(kind)} />
+  {
+    variant === 'hero' && zh && (
+      <text
+        x="24"
+        y="42"
+        fill="rgba(243,236,223,.22)"
+        font-size="34"
+        font-family="PingFang SC, Microsoft YaHei, serif"
+      >
+        {zh}
+      </text>
+    )
+  }
 </svg>

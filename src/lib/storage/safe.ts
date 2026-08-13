@@ -23,3 +23,12 @@ export function getLocalStorage(): Storage | null {
     return null;
   }
 }
+
+export function getSessionStorage(): Storage | null {
+  try {
+    if (typeof sessionStorage === 'undefined') return null;
+    return sessionStorage;
+  } catch {
+    return null;
+  }
+}

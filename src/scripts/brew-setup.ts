@@ -44,6 +44,7 @@ export function mountBrewSetup(): void {
   let volume = remembered && remembered > 0 ? remembered : gongfu[0].referenceVolumeMl;
   let strength: Strength = 'normal';
   let customMode = !VOLUME_PRESETS_ML.includes(volume as (typeof VOLUME_PRESETS_ML)[number]);
+  let opener: HTMLElement | null = null;
 
   const currentRecipe = (): BrewingRecipe =>
     gongfu.find((recipe) => recipe.vessel === vessel) ?? gongfu[0];
@@ -68,8 +69,12 @@ export function mountBrewSetup(): void {
           `<button type="button" class="choice" data-strength="${item}" aria-pressed="${item === strength}">${t(`brew.strength.${item}`)}</button>`,
       )
       .join('');
+    const wasCustomHidden = customInput.hidden;
     customInput.hidden = !customMode;
-    if (customMode) customInput.value = String(volume);
+    if (customMode) {
+      customInput.value = String(volume || '');
+      if (wasCustomHidden) customInput.focus();
+    }
     updatePreview();
   };
 
@@ -103,13 +108,21 @@ export function mountBrewSetup(): void {
     `;
   };
 
+  const unlockPage = (): void => {
+    document.body.classList.remove('is-locked');
+    opener?.focus();
+  };
+
   openers.forEach((button) => {
     button.addEventListener('click', () => {
+      opener = button;
+      document.body.classList.add('is-locked');
       dialog.showModal();
       renderChoices();
     });
   });
 
+  dialog.addEventListener('close', unlockPage);
   root.querySelector('[data-close-brew]')?.addEventListener('click', () => dialog.close());
 
   vesselBox.addEventListener('click', (event) => {

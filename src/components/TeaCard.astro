@@ -11,7 +11,9 @@ const { tea } = Astro.props;
 ---
 
 <a class="tea-card" href={teaPath(tea.data.slug)}>
-  <TeaMark accent={tea.data.accent} title={tea.data.names.ru} />
-  <h3>{tea.data.names.ru}</h3>
-  <p class="zh">{tea.data.names.zhHans} · {tea.data.names.pinyin}</p>
+  <TeaMark teaId={tea.data.id} accent={tea.data.accent} title={tea.data.names.ru} />
+  <div class="tea-card__body">
+    <h3>{tea.data.names.ru}</h3>
+    <p class="zh">{tea.data.names.zhHans} · {tea.data.names.pinyin}</p>
+  </div>
 </a>

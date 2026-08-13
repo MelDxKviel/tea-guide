@@ -3,7 +3,13 @@ import { createSession, reduceSession } from '../../src/lib/brewing/session';
 import type { BrewingRecipe } from '../../src/lib/brewing/types';
 import { loadPreferences, savePreferences } from '../../src/lib/storage/preferences';
 import { loadRecent, pushRecent } from '../../src/lib/storage/recent';
-import { clearSession, loadSession, saveSession } from '../../src/lib/storage/session';
+import {
+  clearSession,
+  dismissRecovery,
+  isRecoveryDismissed,
+  loadSession,
+  saveSession,
+} from '../../src/lib/storage/session';
 
 class MemoryStorage implements Storage {
   private data = new Map<string, string>();
@@ -85,6 +91,48 @@ describe('session persistence', () => {
     expect(restored).not.toBeNull();
     const synced = reduceSession(restored!, recipe, { type: 'SYNC' }, t0 + 30_000);
     expect(synced.stage).toBe('infusion-complete');
+  });
+});
+
+describe('recovery banner dismiss', () => {
+  it('stays dismissed for the same session across page loads', () => {
+    const storage = new MemoryStorage();
+    const session = createSession({
+      teaId: 'tea-1',
+      teaSlug: 'tea-1',
+      teaName: 'Тест',
+      recipe,
+      volumeMl: 100,
+      strength: 'normal',
+      now: 42,
+    });
+    expect(isRecoveryDismissed(session, storage)).toBe(false);
+    dismissRecovery(session, storage);
+    expect(isRecoveryDismissed(session, storage)).toBe(true);
+  });
+
+  it('shows the banner again for a new brewing session', () => {
+    const storage = new MemoryStorage();
+    const first = createSession({
+      teaId: 'tea-1',
+      teaSlug: 'tea-1',
+      teaName: 'Тест',
+      recipe,
+      volumeMl: 100,
+      strength: 'normal',
+      now: 42,
+    });
+    dismissRecovery(first, storage);
+    const next = createSession({
+      teaId: 'tea-1',
+      teaSlug: 'tea-1',
+      teaName: 'Тест',
+      recipe,
+      volumeMl: 100,
+      strength: 'normal',
+      now: 99,
+    });
+    expect(isRecoveryDismissed(next, storage)).toBe(false);
   });
 });
 

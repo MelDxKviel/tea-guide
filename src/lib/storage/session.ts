@@ -1,6 +1,6 @@
 import { SESSION_VERSION, type BrewSession } from '../brewing/types';
 import { STORAGE_KEYS } from './keys';
-import { getLocalStorage, readJson, writeJson } from './safe';
+import { getLocalStorage, getSessionStorage, readJson, writeJson } from './safe';
 
 export function loadSession(storage: Storage | null = getLocalStorage()): BrewSession | null {
   if (!storage) return null;
@@ -25,4 +25,23 @@ export function clearSession(storage: Storage | null = getLocalStorage()): void 
 
 export function isSessionActive(session: BrewSession | null): boolean {
   return Boolean(session && session.stage !== 'session-complete' && session.stage !== 'setup');
+}
+
+export function isRecoveryDismissed(
+  session: BrewSession,
+  storage: Storage | null = getSessionStorage(),
+): boolean {
+  if (!storage) return false;
+  return storage.getItem(STORAGE_KEYS.recoveryDismissed) === String(session.createdAt);
+}
+
+export function dismissRecovery(
+  session: BrewSession,
+  storage: Storage | null = getSessionStorage(),
+): void {
+  try {
+    storage?.setItem(STORAGE_KEYS.recoveryDismissed, String(session.createdAt));
+  } catch {
+    // ignore
+  }
 }

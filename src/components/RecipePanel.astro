@@ -6,9 +6,10 @@ import type { BrewingRecipe } from '../lib/brewing/types';
 interface Props {
   recipe: BrewingRecipe;
   methodLabel: string;
+  note?: string;
 }
 
-const { recipe, methodLabel } = Astro.props;
+const { recipe, methodLabel, note } = Astro.props;
 const sourceCount = recipe.sourceRefs.length;
 ---
 
@@ -17,6 +18,9 @@ const sourceCount = recipe.sourceRefs.length;
     <p class="kicker">{t('tea.baseRecipe')}</p>
     <p class="recipe-panel__method">{methodLabel}</p>
   </div>
+  {
+    note && <p class="recipe-panel__same">{note}</p>
+  }
   <div class="recipe-panel__grid">
     <div class="stat">
       <dt>Лист / вода</dt>
@@ -72,11 +76,12 @@ const sourceCount = recipe.sourceRefs.length;
   {
     recipe.infusions && recipe.infusions.length > 0 && (
       <>
-        <p>{t('tea.infusions')}</p>
-        <ol class="infusion-list">
+        <p class="infusion-steps__title">{t('tea.infusions')}</p>
+        <ol class="infusion-steps">
           {recipe.infusions.map((item) => (
             <li>
-              {item.number} — {item.durationSeconds} с
+              <span class="infusion-steps__n">{item.number}</span>
+              <span class="infusion-steps__t">{item.durationSeconds} с</span>
             </li>
           ))}
         </ol>
@@ -84,11 +89,7 @@ const sourceCount = recipe.sourceRefs.length;
     )
   }
 
-  {
-    recipe.notes?.map((note) => (
-      <p class="meta-line">{note}</p>
-    ))
-  }
+  {recipe.notes?.map((item) => <p class="meta-line">{item}</p>)}
 
   <details class="details">
     <summary>{t('tea.recipeBySources')} · {sourceCountLabel(sourceCount)}</summary>
