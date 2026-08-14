@@ -1,15 +1,58 @@
 ---
 import { t } from '../i18n';
 import { catalogPath, guidePath, teawarePath } from '../lib/urls';
+
+const githubUrl = 'https://github.com/MelDxKviel/tea-guide';
 ---
 
-<footer class="site-footer">
-  <div class="wrap">
-    <nav class="footer-nav" aria-label="Подвал">
-      <a href={catalogPath()}>{t('nav.teas')}</a>
-      <a href={teawarePath()}>{t('nav.teaware')}</a>
-      <a href={guidePath()}>{t('nav.guides')}</a>
-    </nav>
-    <p>{t('footer.note')}</p>
+<footer class="site-footer" id="site-footer">
+  <div class="wrap footer-inner">
+    <div class="footer-copy">
+      <nav class="footer-nav" aria-label="Подвал">
+        <a href={catalogPath()}>{t('nav.teas')}</a>
+        <a href={teawarePath()}>{t('nav.teaware')}</a>
+        <a href={guidePath()}>{t('nav.guides')}</a>
+      </nav>
+      <p>{t('footer.note')}</p>
+    </div>
+    <a class="footer-github" href={githubUrl} target="_blank" rel="noopener noreferrer">
+      <svg class="footer-github__icon" viewBox="0 0 24 24" aria-hidden="true">
+        <circle cx="6" cy="5" r="2"></circle>
+        <circle cx="18" cy="7" r="2"></circle>
+        <circle cx="6" cy="19" r="2"></circle>
+        <path d="M6 7v10M8 7h5a5 5 0 0 1 5 5V9"></path>
+      </svg>
+      <span class="footer-github__copy">
+        <strong>Tea Guide на GitHub</strong>
+        <small>Понравился проект? Поставьте звезду</small>
+      </span>
+      <span class="footer-github__stars" aria-label="Звёзды на GitHub">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="m12 3 2.7 5.5 6.1.9-4.4 4.3 1 6.1-5.4-2.9-5.4 2.9 1-6.1-4.4-4.3 6.1-.9L12 3Z"
+          ></path>
+        </svg>
+        <span data-github-stars aria-live="polite">1</span>
+      </span>
+    </a>
   </div>
+  <script>
+    const count = document.querySelector<HTMLElement>('[data-github-stars]');
+    if (count) {
+      void fetch('https://api.github.com/repos/MelDxKviel/tea-guide', {
+        headers: { Accept: 'application/vnd.github+json' },
+      })
+        .then((response) => {
+          if (!response.ok) throw new Error('GitHub API unavailable');
+          return response.json() as Promise<{ stargazers_count?: number }>;
+        })
+        .then((repository) => {
+          if (typeof repository.stargazers_count === 'number') {
+            count.textContent = new Intl.NumberFormat('ru-RU', { notation: 'compact' }).format(
+              repository.stargazers_count,
+            );
+          }
+        })
+        .catch(() => undefined);
+    }
+  </script>
 </footer>

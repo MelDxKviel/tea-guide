@@ -37,8 +37,15 @@ const related = tea.data.relatedTeaIds
   ? (await Promise.all(tea.data.relatedTeaIds.map((id) => getEntry('teas', id)))).filter(
       (item): item is NonNullable<typeof item> => Boolean(item),
     )
-  : (await teasByCategory(tea.data.categoryId)).filter((item) => item.data.id !== tea.data.id).slice(0, 3);
-const origin = [tea.data.origin.country, tea.data.origin.province, tea.data.origin.region, tea.data.origin.locality]
+  : (await teasByCategory(tea.data.categoryId))
+      .filter((item) => item.data.id !== tea.data.id)
+      .slice(0, 3);
+const origin = [
+  tea.data.origin.country,
+  tea.data.origin.province,
+  tea.data.origin.region,
+  tea.data.origin.locality,
+]
   .filter(Boolean)
   .join(' → ');
 ---
@@ -48,9 +55,16 @@ const origin = [tea.data.origin.country, tea.data.origin.province, tea.data.orig
     <Breadcrumbs
       items={[
         { href: catalogPath(), label: t('nav.teas') },
-        ...(category ? [{ href: categoryPath(category.data.slug), label: category.data.shortTitle }] : []),
+        ...(category
+          ? [{ href: categoryPath(category.data.slug), label: category.data.shortTitle }]
+          : []),
         ...(subgroup && category
-          ? [{ href: subgroupPath(category.data.slug, subgroup.data.slug), label: subgroup.data.title }]
+          ? [
+              {
+                href: subgroupPath(category.data.slug, subgroup.data.slug),
+                label: subgroup.data.title,
+              },
+            ]
           : []),
         { label: tea.data.names.ru },
       ]}
@@ -79,9 +93,13 @@ const origin = [tea.data.origin.country, tea.data.origin.province, tea.data.orig
           {
             defaultGongfu && (
               <p class="meta-line">
-                {defaultGongfu.temperature ? `${defaultGongfu.temperature.recommendedCelsius}°C` : ''}
+                {defaultGongfu.temperature
+                  ? `${defaultGongfu.temperature.recommendedCelsius}°C`
+                  : ''}
                 {defaultGongfu.vessel ? ` · ${vesselLabel(defaultGongfu.vessel)}` : ''}
-                {gongfu.some((item) => item.vessel === 'yixing') ? ` / ${vesselLabel('yixing')}` : ''}
+                {gongfu.some((item) => item.vessel === 'yixing')
+                  ? ` / ${vesselLabel('yixing')}`
+                  : ''}
               </p>
             )
           }
@@ -159,7 +177,7 @@ const origin = [tea.data.origin.country, tea.data.origin.province, tea.data.orig
 
         {
           other.map((recipe) => (
-            <div id={`method-${recipe.method}`}>
+            <div id={`method-${recipe.method}`} class="method-block">
               <RecipePanel recipe={recipe} methodLabel={methodLabel(recipe.method)} />
             </div>
           ))
@@ -187,12 +205,14 @@ const origin = [tea.data.origin.country, tea.data.origin.province, tea.data.orig
       <section class="section">
         <h2>{t('tea.vessels')}</h2>
         <p>
-          {(tea.data.recommendedVessels ?? ['gaiwan']).map((vessel, index) => (
-            <>
-              {index > 0 && ', '}
-              <a href={teawarePath(vessel)}>{vesselLabel(vessel)}</a>
-            </>
-          ))}
+          {
+            (tea.data.recommendedVessels ?? ['gaiwan']).map((vessel, index) => (
+              <>
+                {index > 0 && ', '}
+                <a href={teawarePath(vessel)}>{vesselLabel(vessel)}</a>
+              </>
+            ))
+          }
           {' · '}
           <a href={guidePath('gongfu')}>что такое проливы</a>
         </p>
@@ -230,7 +250,14 @@ const origin = [tea.data.origin.country, tea.data.origin.province, tea.data.orig
       }
     </article>
   </div>
-  {gongfu.length > 0 && (
-    <BrewSetup teaId={tea.data.id} teaSlug={tea.data.slug} teaName={tea.data.names.ru} recipes={recipes} />
-  )}
+  {
+    gongfu.length > 0 && (
+      <BrewSetup
+        teaId={tea.data.id}
+        teaSlug={tea.data.slug}
+        teaName={tea.data.names.ru}
+        recipes={recipes}
+      />
+    )
+  }
 </BaseLayout>
