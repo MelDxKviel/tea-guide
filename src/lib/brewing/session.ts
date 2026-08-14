@@ -201,7 +201,6 @@ function adjustStage(session: BrewSession, deltaMs: number, now: number): BrewSe
 
 function skipRinse(session: BrewSession, recipe: BrewingRecipe, now: number): BrewSession {
   if (!session.stage.startsWith('rinse')) return session;
-  if (!recipe.rinse?.optional) return session;
   return moveToInfusion(session, recipe, 0, now);
 }
 
@@ -242,30 +241,55 @@ function restartStage(session: BrewSession, recipe: BrewingRecipe, now: number):
   );
   const timer = readyCountdown(seconds * 1000, 'infusion');
   const modified = { ...session.modifiedInfusionDurations };
-  const key = session.isExtension ? extensionKey(session.extensionCount) : String(session.currentInfusionIndex);
+  const key = session.isExtension
+    ? extensionKey(session.extensionCount)
+    : String(session.currentInfusionIndex);
   delete modified[key];
-  return { ...session, timer, stage: timer.state, modifiedInfusionDurations: modified, updatedAt: now };
+  return {
+    ...session,
+    timer,
+    stage: timer.state,
+    modifiedInfusionDurations: modified,
+    updatedAt: now,
+  };
 }
 
 function advance(session: BrewSession, recipe: BrewingRecipe, now: number): BrewSession {
-  if (session.stage === 'rinse-complete' || (session.stage.startsWith('rinse') && hasExpired(session.timer, now))) {
+  if (
+    session.stage === 'rinse-complete' ||
+    (session.stage.startsWith('rinse') && hasExpired(session.timer, now))
+  ) {
     return moveToInfusion(session, recipe, 0, now);
   }
   if (session.stage !== 'infusion-complete' && !hasExpired(session.timer, now)) {
     if (!isStageCompleteState(session.stage)) return session;
   }
-  if (!session.stage.startsWith('infusion') && session.stage !== 'infusion-complete') return session;
+  if (!session.stage.startsWith('infusion') && session.stage !== 'infusion-complete')
+    return session;
 
   const nextIndex = session.currentInfusionIndex + 1;
   if (nextIndex < session.totalInfusions) {
     return moveToInfusion(session, recipe, nextIndex, now);
   }
-  return { ...session, stage: 'session-complete', timer: { ...session.timer, state: 'session-complete', remainingMs: 0, expectedEndAt: undefined }, updatedAt: now };
+  return {
+    ...session,
+    stage: 'session-complete',
+    timer: {
+      ...session.timer,
+      state: 'session-complete',
+      remainingMs: 0,
+      expectedEndAt: undefined,
+    },
+    updatedAt: now,
+  };
 }
 
 function startExtension(session: BrewSession, recipe: BrewingRecipe, now: number): BrewSession {
   if (!canExtend(recipe)) return session;
-  if (session.stage !== 'session-complete' && session.currentInfusionIndex < session.totalInfusions - 1) {
+  if (
+    session.stage !== 'session-complete' &&
+    session.currentInfusionIndex < session.totalInfusions - 1
+  ) {
     return session;
   }
   const readyCount = session.extensionCount;
@@ -284,7 +308,12 @@ function startExtension(session: BrewSession, recipe: BrewingRecipe, now: number
   };
 }
 
-function jumpInfusion(session: BrewSession, recipe: BrewingRecipe, index: number, now: number): BrewSession {
+function jumpInfusion(
+  session: BrewSession,
+  recipe: BrewingRecipe,
+  index: number,
+  now: number,
+): BrewSession {
   if (index < 0) return session;
   if (index >= session.totalInfusions) {
     if (canExtend(recipe) && index === session.totalInfusions) {
@@ -295,8 +324,18 @@ function jumpInfusion(session: BrewSession, recipe: BrewingRecipe, index: number
   return moveToInfusion(session, recipe, index, now);
 }
 
-function moveToInfusion(session: BrewSession, recipe: BrewingRecipe, index: number, now: number): BrewSession {
-  const seconds = getInfusionDurationSeconds(recipe, index, session.modifiedInfusionDurations, session.extensionCount);
+function moveToInfusion(
+  session: BrewSession,
+  recipe: BrewingRecipe,
+  index: number,
+  now: number,
+): BrewSession {
+  const seconds = getInfusionDurationSeconds(
+    recipe,
+    index,
+    session.modifiedInfusionDurations,
+    session.extensionCount,
+  );
   const timer = readyCountdown(seconds * 1000, 'infusion');
   return {
     ...session,

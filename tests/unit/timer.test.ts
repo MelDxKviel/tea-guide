@@ -41,7 +41,9 @@ describe('timer timestamps', () => {
     session = reduceSession(session, recipe, { type: 'SKIP_RINSE' }, t0);
     session = reduceSession(session, recipe, { type: 'START' }, t0);
     expect(remainingMs(session.timer, t0 + 3_000)).toBe(5_000);
-    expect(reduceSession(session, recipe, { type: 'SYNC' }, t0 + 8_000).stage).toBe('infusion-complete');
+    expect(reduceSession(session, recipe, { type: 'SYNC' }, t0 + 8_000).stage).toBe(
+      'infusion-complete',
+    );
   });
 
   it('survives background elapsed time', () => {
@@ -99,6 +101,27 @@ describe('timer timestamps', () => {
 });
 
 describe('sequence', () => {
+  it('lets the user skip a rinse even when the recipe recommends it', () => {
+    const t0 = 0;
+    const recipeWithRecommendedRinse: BrewingRecipe = {
+      ...recipe,
+      rinse: { durationSeconds: 5, optional: false },
+    };
+    let session = createSession({
+      teaId: 'da-hong-pao',
+      teaSlug: 'da-hong-pao',
+      teaName: 'Да Хун Пао',
+      recipe: recipeWithRecommendedRinse,
+      volumeMl: 110,
+      strength: 'normal',
+      now: t0,
+    });
+
+    session = reduceSession(session, recipeWithRecommendedRinse, { type: 'SKIP_RINSE' }, t0);
+
+    expect(session.stage).toBe('infusion-ready');
+  });
+
   it('treats rinse as its own stage', () => {
     const t0 = 0;
     let session = sessionAt(t0);

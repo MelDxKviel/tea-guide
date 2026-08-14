@@ -1,6 +1,8 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Tea Guide">
-  <rect width="64" height="64" fill="#1d4536"/>
-  <path d="M14 40c0-10 8-18 18-18h2c2 0 4-2 4-4v-2" fill="none" stroke="#f3ecdf" stroke-width="2.4"/>
-  <path d="M16 42h24c0 8-5 12-12 12s-12-4-12-12z" fill="none" stroke="#f3ecdf" stroke-width="2.4"/>
-  <path d="M40 34h6c3 0 6 3 6 6s-3 6-6 6h-4" fill="none" stroke="#f3ecdf" stroke-width="2.4"/>
+  <rect width="64" height="64" rx="14" fill="#1d4536"/>
+  <path d="M13 35h38c-1 12-8 19-19 19s-18-7-19-19Z" fill="#f3ecdf"/>
+  <path d="M18 31c7-5 21-6 28 0" fill="none" stroke="#f3ecdf" stroke-width="3" stroke-linecap="round"/>
+  <path d="M23 58h18" fill="none" stroke="#f3ecdf" stroke-width="3" stroke-linecap="round"/>
+  <path d="M33 29c-8-3-12-10-10-18 8 1 14 6 15 13-1 3-2 4-5 5Z" fill="#e4c56a"/>
+  <path d="M24 13c4 4 7 9 9 16" fill="none" stroke="#1d4536" stroke-width="2" stroke-linecap="round"/>
 </svg>

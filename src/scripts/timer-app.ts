@@ -1,7 +1,12 @@
 import { t, vesselLabel } from '../i18n';
 import { formatDurationMs } from '../lib/brewing/calculate';
 import { canExtend, nextExtensionSeconds } from '../lib/brewing/sequence';
-import { currentNote, displayInfusionNumber, plannedDurations, reduceSession } from '../lib/brewing/session';
+import {
+  currentNote,
+  displayInfusionNumber,
+  plannedDurations,
+  reduceSession,
+} from '../lib/brewing/session';
 import { isPausedState, isReadyState, isRunningState, remainingMs } from '../lib/brewing/timer';
 import type { BrewSession, BrewingRecipe, SessionAction } from '../lib/brewing/types';
 import { loadPreferences, savePreferences, type UserPreferences } from '../lib/storage/preferences';
@@ -41,7 +46,9 @@ export function mountTimerApp(): void {
   const dispatch = (action: SessionAction, now = Date.now()): void => {
     const next = reduceSession(session!, recipe, action, now);
     const completed =
-      (lastStage.endsWith('running') || lastStage.endsWith('paused') || lastStage.endsWith('ready')) &&
+      (lastStage.endsWith('running') ||
+        lastStage.endsWith('paused') ||
+        lastStage.endsWith('ready')) &&
       next.stage.endsWith('complete') &&
       next.stage !== lastStage;
     session = next;
@@ -84,26 +91,54 @@ export function mountTimerApp(): void {
       unlockAudio();
       dispatch({ type: 'START' });
     });
-    root.querySelector('[data-act="pause"]')?.addEventListener('click', () => dispatch({ type: 'PAUSE' }));
+    root
+      .querySelector('[data-act="pause"]')
+      ?.addEventListener('click', () => dispatch({ type: 'PAUSE' }));
     root.querySelector('[data-act="resume"]')?.addEventListener('click', () => {
       unlockAudio();
       dispatch({ type: 'RESUME' });
     });
-    root.querySelector('[data-act="advance"]')?.addEventListener('click', () => dispatch({ type: 'ADVANCE' }));
-    root.querySelector('[data-act="skip"]')?.addEventListener('click', () => dispatch({ type: 'SKIP_RINSE' }));
-    root.querySelector('[data-act="plus"]')?.addEventListener('click', () => dispatch({ type: 'ADJUST', deltaMs: 5_000 }));
-    root.querySelector('[data-act="minus"]')?.addEventListener('click', () => dispatch({ type: 'ADJUST', deltaMs: -5_000 }));
-    root.querySelector('[data-act="finish"]')?.addEventListener('click', () => dispatch({ type: 'FINISH_STAGE' }));
-    root.querySelector('[data-act="restart-stage"]')?.addEventListener('click', () => dispatch({ type: 'RESTART_STAGE' }));
-    root.querySelector('[data-act="prev"]')?.addEventListener('click', () => dispatch({ type: 'PREV_INFUSION' }));
-    root.querySelector('[data-act="next"]')?.addEventListener('click', () => dispatch({ type: 'NEXT_INFUSION' }));
+    root
+      .querySelector('[data-act="advance"]')
+      ?.addEventListener('click', () => dispatch({ type: 'ADVANCE' }));
+    root.querySelector('[data-act="skip-stage"]')?.addEventListener('click', () => {
+      if (!session) return;
+      if (session.stage.startsWith('rinse')) {
+        dispatch({ type: 'SKIP_RINSE' });
+        return;
+      }
+      dispatch({ type: 'FINISH_STAGE' });
+      dispatch({ type: 'ADVANCE' });
+    });
+    root
+      .querySelector('[data-act="plus"]')
+      ?.addEventListener('click', () => dispatch({ type: 'ADJUST', deltaMs: 5_000 }));
+    root
+      .querySelector('[data-act="minus"]')
+      ?.addEventListener('click', () => dispatch({ type: 'ADJUST', deltaMs: -5_000 }));
+    root
+      .querySelector('[data-act="finish"]')
+      ?.addEventListener('click', () => dispatch({ type: 'FINISH_STAGE' }));
+    root
+      .querySelector('[data-act="restart-stage"]')
+      ?.addEventListener('click', () => dispatch({ type: 'RESTART_STAGE' }));
+    root
+      .querySelector('[data-act="prev"]')
+      ?.addEventListener('click', () => dispatch({ type: 'PREV_INFUSION' }));
+    root
+      .querySelector('[data-act="next"]')
+      ?.addEventListener('click', () => dispatch({ type: 'NEXT_INFUSION' }));
     root.querySelector('[data-act="end"]')?.addEventListener('click', () => {
       dispatch({ type: 'END_SESSION' });
       clearSession();
       render();
     });
-    root.querySelector('[data-act="restart"]')?.addEventListener('click', () => dispatch({ type: 'RESTART_SESSION' }));
-    root.querySelector('[data-act="extend"]')?.addEventListener('click', () => dispatch({ type: 'START_EXTENSION' }));
+    root
+      .querySelector('[data-act="restart"]')
+      ?.addEventListener('click', () => dispatch({ type: 'RESTART_SESSION' }));
+    root
+      .querySelector('[data-act="extend"]')
+      ?.addEventListener('click', () => dispatch({ type: 'START_EXTENSION' }));
     root.querySelector('[data-pref="sound"]')?.addEventListener('click', () => {
       prefs = savePreferences({ sound: !prefs.sound });
       render();
@@ -144,7 +179,10 @@ export function mountTimerApp(): void {
 
   document.addEventListener('keydown', (event) => {
     const target = event.target as HTMLElement | null;
-    if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable)) {
+    if (
+      target &&
+      (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable)
+    ) {
       return;
     }
     if (event.code === 'Space') {
@@ -153,7 +191,8 @@ export function mountTimerApp(): void {
       if (isRunningState(session.stage)) dispatch({ type: 'PAUSE' });
       else if (isPausedState(session.stage)) dispatch({ type: 'RESUME' });
       else if (isReadyState(session.stage)) dispatch({ type: 'START' });
-      else if (session.stage.endsWith('complete') && session.stage !== 'session-complete') dispatch({ type: 'ADVANCE' });
+      else if (session.stage.endsWith('complete') && session.stage !== 'session-complete')
+        dispatch({ type: 'ADVANCE' });
     } else if (event.key === '+' || event.key === '=') {
       dispatch({ type: 'ADJUST', deltaMs: 5_000 });
     } else if (event.key === '-' || event.key === '_') {
@@ -174,28 +213,41 @@ export function mountTimerApp(): void {
 }
 
 function emptyState(message: string): string {
-  return `<div class="timer-shell"><p>${message}</p><p><a href="${catalogPath()}">К каталогу</a></p></div>`;
+  return `
+    <main class="timer-shell timer-shell--empty">
+      <div class="timer-finish">
+        <p class="timer-kicker">${t('timer.label')}</p>
+        <h1 class="timer-name">${message}</h1>
+        <a class="btn timer-main" href="${catalogPath()}">К каталогу</a>
+      </div>
+    </main>
+  `;
 }
 
 function template(session: BrewSession, recipe: BrewingRecipe, prefs: UserPreferences): string {
   if (session.stage === 'session-complete') {
     const extra = canExtend(recipe)
-      ? `<p>${t('timer.canExtend')}</p>
+      ? `<p class="timer-finish__note">${t('timer.canExtend')}</p>
          <button class="btn timer-main" type="button" data-act="extend">${t('timer.moreInfusion', { n: nextExtensionSeconds(recipe, session.extensionCount) ?? '' })}</button>`
       : '';
     return `
-      <div class="timer-shell">
-        <p class="timer-kicker">${t('timer.label')}</p>
-        <div class="timer-top"><a href="${teaPath(session.teaSlug)}">${t('timer.backToTea')}</a></div>
-        <h1 class="timer-name">${session.teaName}</h1>
-        <p class="timer-status is-done">${t('timer.sessionDone')}</p>
-        <p>${session.totalInfusions} проливов · ${session.leafGrams} г · ${session.volumeMl} мл${session.vessel ? ` · ${vesselLabel(session.vessel)}` : ''}${session.temperature ? ` · ${session.temperature.recommendedCelsius}°C` : ''}</p>
-        ${extra}
-        <div class="timer-actions" style="margin-top:1rem">
-          <button class="btn" type="button" data-act="restart">${t('timer.brewAgain')}</button>
-          <a class="btn btn--ghost" href="${teaPath(session.teaSlug)}">${t('timer.backToTea')}</a>
+      <main class="timer-shell timer-shell--complete">
+        <header class="timer-header">
+          <p class="timer-kicker">${t('timer.label')}</p>
+          <a class="timer-back" href="${teaPath(session.teaSlug)}"><span aria-hidden="true">←</span> ${t('timer.backToTea')}</a>
+        </header>
+        <div class="timer-finish">
+          <div class="timer-finish__mark" aria-hidden="true">✓</div>
+          <p class="timer-stage">${t('timer.sessionDone')}</p>
+          <h1 class="timer-name">${session.teaName}</h1>
+          <p class="timer-finish__summary">${session.totalInfusions} проливов · ${session.leafGrams} г · ${session.volumeMl} мл${session.vessel ? ` · ${vesselLabel(session.vessel)}` : ''}${session.temperature ? ` · ${session.temperature.recommendedCelsius}°C` : ''}</p>
+          ${extra}
+          <div class="timer-finish__actions">
+            <button class="btn" type="button" data-act="restart">${t('timer.brewAgain')}</button>
+            <a class="btn btn--ghost" href="${teaPath(session.teaSlug)}">${t('timer.backToTea')}</a>
+          </div>
         </div>
-      </div>
+      </main>
     `;
   }
 
@@ -204,20 +256,20 @@ function template(session: BrewSession, recipe: BrewingRecipe, prefs: UserPrefer
   const running = isRunningState(session.stage);
   const paused = isPausedState(session.stage);
   const complete = session.stage.endsWith('complete');
-  const optionalRinse = Boolean(recipe.rinse?.optional && rinse);
   const note = currentNote(session, recipe);
   const stageLabel = rinse
     ? t('timer.rinse')
     : session.isExtension
       ? t('timer.extension')
-      : t('timer.infusionOf', { current: displayInfusionNumber(session), total: session.totalInfusions });
+      : t('timer.infusionOf', {
+          current: displayInfusionNumber(session),
+          total: session.totalInfusions,
+        });
 
   let primary = '';
+  let secondary = '';
   if (ready && rinse) {
     primary = `<button class="btn timer-main" type="button" data-act="start" data-testid="start-stage">${t('timer.startRinse')}</button>`;
-    if (optionalRinse) {
-      primary += `<button class="btn btn--ghost" type="button" data-act="skip" data-testid="skip-rinse">${t('timer.skipRinse')}</button>`;
-    }
   } else if (ready) {
     primary = `<button class="btn timer-main" type="button" data-act="start" data-testid="start-stage">${t('timer.start')}</button>`;
   } else if (running) {
@@ -230,48 +282,71 @@ function template(session: BrewSession, recipe: BrewingRecipe, prefs: UserPrefer
     primary = `<button class="btn timer-main" type="button" data-act="advance" data-testid="advance">${t('timer.nextInfusion')}</button>`;
   }
 
+  if (!complete) {
+    secondary = rinse
+      ? `<button class="btn timer-secondary" type="button" data-act="skip-stage" data-testid="skip-rinse">${t('timer.skipRinse')}</button>`
+      : `<button class="btn timer-secondary" type="button" data-act="skip-stage" data-testid="skip-infusion">${t('timer.skipInfusion')}</button>`;
+  }
+
   const status = complete
     ? rinse
       ? `${t('timer.rinseComplete')}. ${t('timer.rinseDrain')}`
       : t('timer.complete')
-    : note ?? '';
+    : (note ?? (paused ? t('timer.paused') : running ? t('timer.running') : t('timer.ready')));
 
   const track = plannedDurations(recipe)
     .map((seconds: number, index: number) => {
-      const cls = index < session.currentInfusionIndex ? 'is-done' : index === session.currentInfusionIndex && !rinse ? 'is-now' : '';
-      return `<span class="${cls}">${seconds}</span>`;
+      const cls =
+        index < session.currentInfusionIndex
+          ? 'is-done'
+          : index === session.currentInfusionIndex && !rinse
+            ? 'is-now'
+            : '';
+      return `<li class="${cls}"><span>${index + 1}</span><strong>${seconds}<small>с</small></strong></li>`;
     })
     .join('');
 
-  const vibrateSupported = typeof navigator !== 'undefined' && typeof navigator.vibrate === 'function';
+  const vibrateSupported =
+    typeof navigator !== 'undefined' && typeof navigator.vibrate === 'function';
 
   return `
-    <div class="timer-shell">
-      <p class="timer-kicker">${t('timer.label')}</p>
-      <div class="timer-top">
-        <a href="${teaPath(session.teaSlug)}">${session.teaName}</a>
-        <span>${session.leafGrams} г · ${session.volumeMl} мл</span>
-      </div>
-      <div class="timer-clock">
-        <p class="timer-stage">${stageLabel}</p>
-        <div class="timer-well">
+    <main class="timer-shell">
+      <header class="timer-header">
+        <p class="timer-kicker">${t('timer.label')}</p>
+        <div class="timer-top">
+          <a class="timer-back" href="${teaPath(session.teaSlug)}"><span aria-hidden="true">←</span> ${session.teaName}</a>
+          <div class="timer-meta" aria-label="Параметры заваривания">
+            <span>${session.leafGrams} г</span>
+            <span>${session.volumeMl} мл</span>
+            ${session.temperature ? `<span>${session.temperature.recommendedCelsius}°C</span>` : ''}
+          </div>
+        </div>
+      </header>
+      <section class="timer-clock" aria-labelledby="timer-stage-label">
+        <p class="timer-stage" id="timer-stage-label">${stageLabel}</p>
+        <div class="timer-well ${running ? 'is-running' : ''} ${paused ? 'is-paused' : ''} ${complete ? 'is-complete' : ''}">
           <div class="timer-digits" data-clock data-testid="clock">${formatDurationMs(remainingMs(session.timer, Date.now()))}</div>
         </div>
         <p class="timer-status ${complete ? 'is-done' : ''}" aria-live="assertive">${status}</p>
-      </div>
-      <div class="timer-actions">
+      </section>
+      <section class="timer-actions" aria-label="${t('timer.controls')}">
         ${primary}
-        ${
-          running || paused || ready
-            ? `<div class="timer-adjust">
-                <button class="btn" type="button" data-act="minus" aria-label="${t('timer.minus5')}">${t('timer.minus5')}</button>
-                <span></span>
-                <button class="btn" type="button" data-act="plus" aria-label="${t('timer.plus5')}">${t('timer.plus5')}</button>
-              </div>`
-            : ''
-        }
-      </div>
-      <div class="timer-track" aria-hidden="true">${track}</div>
+        <div class="timer-adjust-slot">
+          ${
+            running || paused || ready
+              ? `<div class="timer-adjust" aria-label="${t('timer.adjust')}">
+                  <button class="btn" type="button" data-act="minus" aria-label="${t('timer.minus5')}">${t('timer.minus5')}</button>
+                  <button class="btn" type="button" data-act="plus" aria-label="${t('timer.plus5')}">${t('timer.plus5')}</button>
+                </div>`
+              : ''
+          }
+        </div>
+        <div class="timer-secondary-slot">${secondary}</div>
+      </section>
+      <section class="timer-track-wrap" aria-labelledby="timer-plan-title">
+        <h2 id="timer-plan-title">${t('timer.plan')}</h2>
+        <ol class="timer-track">${track}</ol>
+      </section>
       <details class="timer-more">
         <summary>${t('timer.more')}</summary>
         <div class="timer-more__actions">
@@ -293,6 +368,6 @@ function template(session: BrewSession, recipe: BrewingRecipe, prefs: UserPrefer
           <p>${t('timer.shortcuts')}</p>
         </div>
       </details>
-    </div>
+    </main>
   `;
 }
