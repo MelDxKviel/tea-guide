@@ -1,11 +1,5 @@
 export type TeaCategoryId =
-  | 'oolong'
-  | 'green-tea'
-  | 'red-tea'
-  | 'white-tea'
-  | 'yellow-tea'
-  | 'dark-tea'
-  | 'puer';
+  'oolong' | 'green-tea' | 'red-tea' | 'white-tea' | 'yellow-tea' | 'dark-tea' | 'puer';
 
 export type GongfuVessel = 'gaiwan' | 'yixing';
 
@@ -100,6 +94,8 @@ export interface BrewTimerSnapshot {
   remainingMs?: number;
   expectedEndAt?: number;
   startedAt?: number;
+  /** Missing in older completed sessions; do not infer it from updatedAt. */
+  completedAt?: number;
 }
 
 export const SESSION_VERSION = 1;

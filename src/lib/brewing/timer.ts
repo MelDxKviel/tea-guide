@@ -60,7 +60,23 @@ export function hasExpired(timer: BrewTimerSnapshot, now: number): boolean {
   return isRunningState(timer.state) && remainingMs(timer, now) === 0;
 }
 
-export function startCountdown(durationMs: number, now: number, kind: 'rinse' | 'infusion'): BrewTimerSnapshot {
+export function elapsedSinceCompletionMs(timer: BrewTimerSnapshot, now: number): number | null {
+  if (
+    !isStageCompleteState(timer.state) ||
+    typeof timer.completedAt !== 'number' ||
+    !Number.isFinite(timer.completedAt) ||
+    timer.completedAt < 0
+  ) {
+    return null;
+  }
+  return Math.max(0, now - timer.completedAt);
+}
+
+export function startCountdown(
+  durationMs: number,
+  now: number,
+  kind: 'rinse' | 'infusion',
+): BrewTimerSnapshot {
   return {
     state: runningStateFor(kind),
     durationMs,
@@ -87,7 +103,7 @@ export function resumeCountdown(timer: BrewTimerSnapshot, now: number): BrewTime
   if (!kind || !isPausedState(timer.state)) return timer;
   const left = Math.max(0, timer.remainingMs ?? timer.durationMs);
   if (left === 0) {
-    return { ...timer, state: completeStateFor(kind), remainingMs: 0, expectedEndAt: undefined };
+    return completeCountdown(timer, now);
   }
   return {
     ...timer,
@@ -98,7 +114,11 @@ export function resumeCountdown(timer: BrewTimerSnapshot, now: number): BrewTime
   };
 }
 
-export function adjustCountdown(timer: BrewTimerSnapshot, deltaMs: number, now: number): BrewTimerSnapshot {
+export function adjustCountdown(
+  timer: BrewTimerSnapshot,
+  deltaMs: number,
+  now: number,
+): BrewTimerSnapshot {
   const kind = stageKind(timer.state);
   if (!kind) return timer;
   if (isStageCompleteState(timer.state) || timer.state === 'session-complete') return timer;
@@ -109,13 +129,7 @@ export function adjustCountdown(timer: BrewTimerSnapshot, deltaMs: number, now: 
 
   if (isRunningState(timer.state)) {
     if (next === 0) {
-      return {
-        state: completeStateFor(kind),
-        durationMs,
-        remainingMs: 0,
-        expectedEndAt: undefined,
-        startedAt: timer.startedAt,
-      };
+      return completeCountdown({ ...timer, durationMs }, now);
     }
     return {
       state: runningStateFor(kind),
@@ -134,14 +148,18 @@ export function adjustCountdown(timer: BrewTimerSnapshot, deltaMs: number, now: 
   };
 }
 
-export function completeCountdown(timer: BrewTimerSnapshot): BrewTimerSnapshot {
+export function completeCountdown(
+  timer: BrewTimerSnapshot,
+  completedAt: number,
+): BrewTimerSnapshot {
   const kind = stageKind(timer.state);
-  if (!kind) return timer;
+  if (!kind || isStageCompleteState(timer.state)) return timer;
   return {
     ...timer,
     state: completeStateFor(kind),
     remainingMs: 0,
     expectedEndAt: undefined,
+    completedAt,
   };
 }
 
@@ -162,5 +180,5 @@ export function syncCountdown(timer: BrewTimerSnapshot, now: number): BrewTimerS
     }
     return timer;
   }
-  return completeCountdown(timer);
+  return completeCountdown(timer, timer.expectedEndAt ?? now);
 }

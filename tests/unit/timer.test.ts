@@ -168,3 +168,55 @@ describe('sequence', () => {
     expect(session.timer.durationMs).toBe(150_000);
   });
 });
+
+describe('time since stage completion', () => {
+  it('records the rinse deadline even when returning from the background much later', () => {
+    let session = reduceSession(sessionAt(1_000), recipe, { type: 'START' }, 1_000);
+    session = reduceSession(session, recipe, { type: 'SYNC' }, 61_000);
+    expect(session.timer).toMatchObject({ state: 'rinse-complete', completedAt: 6_000 });
+    session = reduceSession(session, recipe, { type: 'SYNC' }, 91_000);
+    expect(session.timer).toMatchObject({ completedAt: 6_000 });
+    expect(session.currentInfusionIndex).toBe(0);
+  });
+
+  it('uses the deadline after pauses and time adjustments, including after serialization', () => {
+    let session = reduceSession(sessionAt(1_000), recipe, { type: 'SKIP_RINSE' }, 1_000);
+    session = reduceSession(session, recipe, { type: 'START' }, 1_000);
+    session = reduceSession(session, recipe, { type: 'PAUSE' }, 4_000);
+    session = reduceSession(session, recipe, { type: 'RESUME' }, 24_000);
+    session = reduceSession(session, recipe, { type: 'ADJUST', deltaMs: 5_000 }, 25_000);
+    session = JSON.parse(JSON.stringify(session));
+    session = reduceSession(session, recipe, { type: 'SYNC' }, 44_000);
+    expect(session.timer).toMatchObject({ state: 'infusion-complete', completedAt: 34_000 });
+  });
+
+  it('records an early manual finish once, rather than the original future deadline', () => {
+    let session = reduceSession(sessionAt(1_000), recipe, { type: 'SKIP_RINSE' }, 1_000);
+    session = reduceSession(session, recipe, { type: 'START' }, 1_000);
+    session = reduceSession(session, recipe, { type: 'FINISH_STAGE' }, 3_000);
+    expect(session.timer).toMatchObject({ state: 'infusion-complete', completedAt: 3_000 });
+    session = reduceSession(session, recipe, { type: 'FINISH_STAGE' }, 6_000);
+    expect(session.timer).toMatchObject({ completedAt: 3_000 });
+  });
+
+  it('records the time a running countdown is shortened to zero', () => {
+    let session = reduceSession(sessionAt(1_000), recipe, { type: 'START' }, 1_000);
+    session = reduceSession(session, recipe, { type: 'ADJUST', deltaMs: -5_000 }, 2_000);
+    expect(session.timer).toMatchObject({ state: 'rinse-complete', completedAt: 2_000 });
+  });
+
+  it('does not carry the completion time into another stage, a restart or an extension', () => {
+    let session = reduceSession(sessionAt(1_000), recipe, { type: 'START' }, 1_000);
+    session = reduceSession(session, recipe, { type: 'SYNC' }, 7_000);
+    expect(session.timer).toMatchObject({ completedAt: 6_000 });
+    for (const action of ['ADVANCE', 'RESTART_STAGE', 'RESTART_SESSION'] as const) {
+      const next = reduceSession(session, recipe, { type: action }, 10_000);
+      expect(next.timer).not.toHaveProperty('completedAt');
+      expect(next.stage).toMatch(/ready$/);
+    }
+    session = reduceSession(session, recipe, { type: 'END_SESSION' }, 10_000);
+    const extension = reduceSession(session, recipe, { type: 'START_EXTENSION' }, 11_000);
+    expect(extension.timer).not.toHaveProperty('completedAt');
+    expect(extension.stage).toBe('infusion-ready');
+  });
+});
