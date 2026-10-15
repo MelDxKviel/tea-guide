@@ -1,6 +1,7 @@
 ---
 import { t } from '../i18n';
 import type { BrewingRecipe } from '../lib/brewing/types';
+import { sessionPath } from '../lib/urls';
 interface Props {
   teaId: string;
   teaSlug: string;
@@ -31,28 +32,52 @@ const payload = {
         </button>
       </div>
 
-      <div class="field" data-vessel-field>
-        <label>{t('brew.vessel')}</label>
-        <div class="choice-row" data-vessel-choices></div>
+      <div data-setup-fields>
+        <div class="field" data-vessel-field>
+          <label>{t('brew.vessel')}</label>
+          <div class="choice-row" data-vessel-choices></div>
+        </div>
+
+        <div class="field">
+          <label>{t('brew.volume')}</label>
+          <div class="choice-row" data-volume-choices></div>
+          <label class="visually-hidden" for="custom-volume">{t('brew.volume.custom')}</label>
+          <input id="custom-volume" data-custom-volume type="text" inputmode="decimal" hidden />
+          <p class="notice notice--warn" data-volume-warning hidden></p>
+        </div>
+
+        <div class="field">
+          <label>{t('brew.strength')}</label>
+          <div class="choice-row" data-strength-choices></div>
+        </div>
+
+        <div data-preview></div>
+        <button class="btn btn--wide" type="button" data-start-session data-testid="start-session">
+          {t('brew.start')}
+        </button>
       </div>
 
-      <div class="field">
-        <label>{t('brew.volume')}</label>
-        <div class="choice-row" data-volume-choices></div>
-        <label class="visually-hidden" for="custom-volume">{t('brew.volume.custom')}</label>
-        <input id="custom-volume" data-custom-volume type="text" inputmode="decimal" hidden />
-        <p class="notice notice--warn" data-volume-warning hidden></p>
-      </div>
-
-      <div class="field">
-        <label>{t('brew.strength')}</label>
-        <div class="choice-row" data-strength-choices></div>
-      </div>
-
-      <div data-preview></div>
-      <button class="btn btn--wide" type="button" data-start-session data-testid="start-session">
-        {t('brew.start')}
-      </button>
+      <section data-replace-session aria-labelledby="replace-session-title" hidden>
+        <h3 id="replace-session-title">{t('brew.active.title')}</h3>
+        <p class="notice" id="replace-session-summary" data-active-session-summary></p>
+        <p id="replace-session-description">{t('brew.active.description')}</p>
+        <div class="sheet__replacement-actions">
+          <a
+            class="btn btn--wide"
+            href={sessionPath()}
+            data-continue-session
+            aria-describedby="replace-session-summary replace-session-description"
+          >
+            {t('brew.active.continue')}
+          </a>
+          <button class="btn btn--ghost btn--wide" type="button" data-confirm-replace>
+            {t('brew.active.replace')}
+          </button>
+          <button class="btn btn--ghost btn--wide" type="button" data-cancel-replace>
+            {t('brew.active.back')}
+          </button>
+        </div>
+      </section>
     </div>
   </dialog>
   <script type="application/json" data-brew-payload set:html={JSON.stringify(payload)} />

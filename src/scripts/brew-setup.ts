@@ -1,10 +1,21 @@
 import { t, vesselLabel } from '../i18n';
-import { calculateRecipeGrams, displayGrams, formatGrams, validateVolume } from '../lib/brewing/calculate';
+import {
+  calculateRecipeGrams,
+  displayGrams,
+  formatGrams,
+  validateVolume,
+} from '../lib/brewing/calculate';
 import { createSession } from '../lib/brewing/session';
-import { VOLUME_PRESETS_ML, type BrewingRecipe, type GongfuVessel, type Strength } from '../lib/brewing/types';
+import {
+  VOLUME_PRESETS_ML,
+  type BrewSession,
+  type BrewingRecipe,
+  type GongfuVessel,
+  type Strength,
+} from '../lib/brewing/types';
 import { loadPreferences, savePreferences } from '../lib/storage/preferences';
 import { pushRecent } from '../lib/storage/recent';
-import { saveSession } from '../lib/storage/session';
+import { tryStartSession } from '../lib/storage/session';
 import { sessionPath } from '../lib/urls';
 import { unlockAudio } from './signals';
 
@@ -34,17 +45,43 @@ export function mountBrewSetup(): void {
   const preview = root.querySelector<HTMLElement>('[data-preview]');
   const warning = root.querySelector<HTMLElement>('[data-volume-warning]');
   const start = root.querySelector<HTMLButtonElement>('[data-start-session]');
-  if (!dialog || !vesselBox || !volumeBox || !strengthBox || !customInput || !preview || !warning || !start) {
+  const fields = root.querySelector<HTMLElement>('[data-setup-fields]');
+  const replacement = root.querySelector<HTMLElement>('[data-replace-session]');
+  const activeSummary = root.querySelector<HTMLElement>('[data-active-session-summary]');
+  const continueSession = root.querySelector<HTMLAnchorElement>('[data-continue-session]');
+  if (
+    !dialog ||
+    !vesselBox ||
+    !volumeBox ||
+    !strengthBox ||
+    !customInput ||
+    !preview ||
+    !warning ||
+    !start ||
+    !fields ||
+    !replacement ||
+    !activeSummary ||
+    !continueSession
+  ) {
     return;
   }
 
-  const vessels = [...new Set(gongfu.map((recipe) => recipe.vessel).filter(Boolean))] as GongfuVessel[];
+  const vessels = [
+    ...new Set(gongfu.map((recipe) => recipe.vessel).filter(Boolean)),
+  ] as GongfuVessel[];
   let vessel: GongfuVessel = vessels[0] ?? 'gaiwan';
   const remembered = payload.lastVolumeMl ?? loadPreferences().lastVolumeMl;
   let volume = remembered && remembered > 0 ? remembered : gongfu[0].referenceVolumeMl;
   let strength: Strength = 'normal';
   let customMode = !VOLUME_PRESETS_ML.includes(volume as (typeof VOLUME_PRESETS_ML)[number]);
   let opener: HTMLElement | null = null;
+  let replacing: BrewSession | null = null;
+
+  const showSettings = (): void => {
+    replacing = null;
+    replacement.hidden = true;
+    fields.hidden = false;
+  };
 
   const currentRecipe = (): BrewingRecipe =>
     gongfu.find((recipe) => recipe.vessel === vessel) ?? gongfu[0];
@@ -117,6 +154,7 @@ export function mountBrewSetup(): void {
     button.addEventListener('click', () => {
       opener = button;
       document.body.classList.add('is-locked');
+      showSettings();
       dialog.showModal();
       renderChoices();
     });
@@ -156,11 +194,10 @@ export function mountBrewSetup(): void {
     renderChoices();
   });
 
-  start.addEventListener('click', () => {
+  const startNewSession = (confirmed: BrewSession | null = null): void => {
     const recipe = currentRecipe();
     const check = validateVolume(String(volume), 'gongfu');
     if (!check.ok || check.value === null) return;
-    unlockAudio();
     const session = createSession({
       teaId: payload.teaId,
       teaSlug: payload.teaSlug,
@@ -170,7 +207,28 @@ export function mountBrewSetup(): void {
       strength,
       vessel: recipe.vessel,
     });
-    saveSession(session);
+    const result = tryStartSession(session, confirmed);
+    if (!result.started) {
+      replacing = result.activeSession;
+      const stage = replacing.stage.startsWith('rinse')
+        ? t('timer.rinse')
+        : replacing.isExtension
+          ? t('timer.extension')
+          : t('timer.infusionOf', {
+              current: replacing.currentInfusionIndex + 1,
+              total: replacing.totalInfusions,
+            });
+      activeSummary.textContent = t('brew.active.summary', {
+        tea: replacing.teaName,
+        stage,
+        volume: replacing.volumeMl,
+      });
+      fields.hidden = true;
+      replacement.hidden = false;
+      continueSession.focus();
+      return;
+    }
+    unlockAudio();
     savePreferences({ lastVolumeMl: check.value });
     pushRecent({
       teaId: payload.teaId,
@@ -180,5 +238,14 @@ export function mountBrewSetup(): void {
       volumeMl: check.value,
     });
     location.href = sessionPath();
+  };
+
+  start.addEventListener('click', () => startNewSession());
+  root.querySelector('[data-confirm-replace]')?.addEventListener('click', () => {
+    startNewSession(replacing);
+  });
+  root.querySelector('[data-cancel-replace]')?.addEventListener('click', () => {
+    showSettings();
+    start.focus();
   });
 }

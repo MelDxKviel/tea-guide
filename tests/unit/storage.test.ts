@@ -9,6 +9,7 @@ import {
   isRecoveryDismissed,
   loadSession,
   saveSession,
+  tryStartSession,
 } from '../../src/lib/storage/session';
 
 class MemoryStorage implements Storage {
@@ -94,6 +95,82 @@ describe('session persistence', () => {
   });
 });
 
+describe('starting another tea', () => {
+  const makeSession = (teaId: string, now: number) =>
+    createSession({
+      teaId,
+      teaSlug: teaId,
+      teaName: teaId,
+      recipe: { ...recipe, teaId, id: `${teaId}-recipe` },
+      volumeMl: 120,
+      strength: 'soft',
+      now,
+    });
+
+  it('keeps the active tea and its paused timer until replacement is confirmed', () => {
+    const storage = new MemoryStorage();
+    let active = makeSession('first', 1000);
+    active = reduceSession(active, recipe, { type: 'START' }, 1000);
+    active = reduceSession(active, recipe, { type: 'PAUSE' }, 4000);
+    saveSession(active, storage);
+    const before = storage.getItem('tea-guide:session:v1');
+    const next = makeSession('second', 5000);
+
+    expect(tryStartSession(next, null, storage)).toEqual({ started: false, activeSession: active });
+    expect(storage.getItem('tea-guide:session:v1')).toBe(before);
+    expect(tryStartSession(next, active, storage)).toEqual({ started: true });
+    expect(loadSession(storage)).toMatchObject({ teaId: 'second', stage: 'infusion-ready' });
+  });
+
+  it('protects a newer session created while the replacement prompt was open', () => {
+    const storage = new MemoryStorage();
+    const earlier = makeSession('first', 1000);
+    const newer = makeSession('first', 2000);
+    saveSession(newer, storage);
+
+    expect(tryStartSession(makeSession('second', 3000), earlier, storage)).toEqual({
+      started: false,
+      activeSession: newer,
+    });
+    expect(loadSession(storage)?.createdAt).toBe(2000);
+  });
+
+  it('accepts confirmation after the same tea advances to another stage', () => {
+    const storage = new MemoryStorage();
+    const earlier = makeSession('first', 1000);
+    saveSession(reduceSession(earlier, recipe, { type: 'NEXT_INFUSION' }, 2000), storage);
+
+    expect(tryStartSession(makeSession('second', 3000), earlier, storage)).toEqual({
+      started: true,
+    });
+  });
+
+  it.each([null, '{invalid', JSON.stringify({ version: 99 })])(
+    'starts normally with missing or incompatible saved data: %s',
+    (saved) => {
+      const storage = new MemoryStorage();
+      if (saved) storage.setItem('tea-guide:session:v1', saved);
+      expect(tryStartSession(makeSession('second', 3000), null, storage)).toEqual({
+        started: true,
+      });
+      expect(loadSession(storage)?.teaId).toBe('second');
+    },
+  );
+
+  it('does not ask to replace a finished tea', () => {
+    const storage = new MemoryStorage();
+    saveSession(
+      reduceSession(makeSession('first', 1000), recipe, { type: 'END_SESSION' }, 2000),
+      storage,
+    );
+    expect(tryStartSession(makeSession('second', 3000), null, storage)).toEqual({ started: true });
+  });
+
+  it('does not block starting when storage is unavailable', () => {
+    expect(tryStartSession(makeSession('second', 3000), null, null)).toEqual({ started: true });
+  });
+});
+
 describe('recovery banner dismiss', () => {
   it('stays dismissed for the same session across page loads', () => {
     const storage = new MemoryStorage();
@@ -140,7 +217,11 @@ describe('preferences and recent', () => {
   it('stores local settings without extra personal data', () => {
     const storage = new MemoryStorage();
     savePreferences({ sound: false, lastVolumeMl: 150 }, storage);
-    expect(loadPreferences(storage)).toMatchObject({ sound: false, lastVolumeMl: 150, wakeLock: true });
+    expect(loadPreferences(storage)).toMatchObject({
+      sound: false,
+      lastVolumeMl: 150,
+      wakeLock: true,
+    });
   });
 
   it('keeps a short recent list', () => {

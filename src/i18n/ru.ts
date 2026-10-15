@@ -66,6 +66,13 @@ export const ru = {
   'brew.calculator': 'Калькулятор закладки',
   'brew.result': 'Итого',
   'brew.start': 'Начать чаепитие',
+  'brew.active.title': 'Уже есть незавершённое чаепитие',
+  'brew.active.description':
+    'Можно продолжить его или заменить новым. После замены прежнее чаепитие восстановить не получится.',
+  'brew.active.continue': 'Продолжить текущее',
+  'brew.active.replace': 'Заменить новым',
+  'brew.active.back': 'Назад к настройкам',
+  'brew.active.summary': '{tea} · {stage} · {volume} мл',
   'brew.close': 'Закрыть',
   'brew.grams': '{n} г',
   'brew.temp': '{n}°C',

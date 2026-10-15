@@ -942,6 +942,12 @@ dialog.sheet::backdrop {
   min-width: 0;
 }
 
+.sheet__replacement-actions {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 1.25rem;
+}
+
 .choice-row {
   display: flex;
   flex-wrap: wrap;

@@ -10,9 +10,35 @@ export function loadSession(storage: Storage | null = getLocalStorage()): BrewSe
   return parsed;
 }
 
-export function saveSession(session: BrewSession, storage: Storage | null = getLocalStorage()): void {
+export function saveSession(
+  session: BrewSession,
+  storage: Storage | null = getLocalStorage(),
+): void {
   if (!storage) return;
   writeJson(storage, STORAGE_KEYS.session, session);
+}
+
+type StartSessionResult = { started: true } | { started: false; activeSession: BrewSession };
+
+/** Only replace the active tea the user has actually agreed to replace. */
+export function tryStartSession(
+  session: BrewSession,
+  replacing: BrewSession | null = null,
+  storage: Storage | null = getLocalStorage(),
+): StartSessionResult {
+  const active = loadSession(storage);
+  if (
+    active &&
+    isSessionActive(active) &&
+    (!replacing ||
+      active.createdAt !== replacing.createdAt ||
+      active.teaId !== replacing.teaId ||
+      active.recipeId !== replacing.recipeId)
+  ) {
+    return { started: false, activeSession: active };
+  }
+  saveSession(session, storage);
+  return { started: true };
 }
 
 export function clearSession(storage: Storage | null = getLocalStorage()): void {
