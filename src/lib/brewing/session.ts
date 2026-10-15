@@ -205,13 +205,16 @@ function skipRinse(session: BrewSession, recipe: BrewingRecipe, now: number): Br
 }
 
 function finishStageNow(session: BrewSession, now: number): BrewSession {
-  if (session.stage === 'session-complete') return session;
+  if (session.stage === 'session-complete' || isStageCompleteState(session.stage)) return session;
   const kind = stageKind(session.stage);
   if (!kind && !isReadyState(session.stage)) return session;
-  const timer = completeCountdown({
-    ...session.timer,
-    state: session.stage.startsWith('rinse') ? 'rinse-running' : 'infusion-running',
-  });
+  const timer = completeCountdown(
+    {
+      ...session.timer,
+      state: session.stage.startsWith('rinse') ? 'rinse-running' : 'infusion-running',
+    },
+    now,
+  );
   return { ...session, timer, stage: timer.state, updatedAt: now };
 }
 

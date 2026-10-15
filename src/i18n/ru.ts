@@ -85,6 +85,7 @@ export const ru = {
   'timer.resume': 'Продолжить',
   'timer.nextInfusion': 'Начать следующий',
   'timer.complete': 'Готово — сливайте чай',
+  'timer.sinceComplete': 'После окончания',
   'timer.rinseComplete': 'Промывка завершена',
   'timer.rinseDrain': 'Слейте воду полностью.',
   'timer.toFirst': 'Перейти к первому проливу',

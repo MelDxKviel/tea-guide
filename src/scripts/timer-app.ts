@@ -1,5 +1,5 @@
 import { t, vesselLabel } from '../i18n';
-import { formatDurationMs } from '../lib/brewing/calculate';
+import { formatDuration, formatDurationMs } from '../lib/brewing/calculate';
 import { canExtend, nextExtensionSeconds } from '../lib/brewing/sequence';
 import {
   currentNote,
@@ -7,7 +7,13 @@ import {
   plannedDurations,
   reduceSession,
 } from '../lib/brewing/session';
-import { isPausedState, isReadyState, isRunningState, remainingMs } from '../lib/brewing/timer';
+import {
+  elapsedSinceCompletionMs,
+  isPausedState,
+  isReadyState,
+  isRunningState,
+  remainingMs,
+} from '../lib/brewing/timer';
 import type { BrewSession, BrewingRecipe, SessionAction } from '../lib/brewing/types';
 import { loadPreferences, savePreferences, type UserPreferences } from '../lib/storage/preferences';
 import { clearSession, loadSession, saveSession } from '../lib/storage/session';
@@ -78,6 +84,11 @@ export function mountTimerApp(): void {
     }
     const clock = root.querySelector('[data-clock]');
     if (clock) clock.textContent = formatDurationMs(remainingMs(session.timer, Date.now()));
+    const elapsed = root.querySelector('[data-elapsed]');
+    const elapsedMs = elapsedSinceCompletionMs(session.timer, Date.now());
+    if (elapsed && elapsedMs !== null) {
+      elapsed.textContent = formatDuration(Math.floor(elapsedMs / 1000));
+    }
   };
 
   const render = (): void => {
@@ -256,6 +267,7 @@ function template(session: BrewSession, recipe: BrewingRecipe, prefs: UserPrefer
   const running = isRunningState(session.stage);
   const paused = isPausedState(session.stage);
   const complete = session.stage.endsWith('complete');
+  const elapsedMs = elapsedSinceCompletionMs(session.timer, Date.now());
   const note = currentNote(session, recipe);
   const stageLabel = rinse
     ? t('timer.rinse')
@@ -328,6 +340,11 @@ function template(session: BrewSession, recipe: BrewingRecipe, prefs: UserPrefer
           <div class="timer-digits" data-clock data-testid="clock">${formatDurationMs(remainingMs(session.timer, Date.now()))}</div>
         </div>
         <p class="timer-status ${complete ? 'is-done' : ''}" aria-live="assertive">${status}</p>
+        ${
+          elapsedMs !== null
+            ? `<p class="timer-elapsed">${t('timer.sinceComplete')} <span data-elapsed>${formatDuration(Math.floor(elapsedMs / 1000))}</span></p>`
+            : ''
+        }
       </section>
       <section class="timer-actions" aria-label="${t('timer.controls')}">
         ${primary}

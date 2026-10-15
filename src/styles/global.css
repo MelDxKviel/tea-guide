@@ -1298,6 +1298,21 @@ body.is-timer .skip-link {
   font-weight: 700;
 }
 
+.timer-elapsed {
+  margin: 0.25rem 0 0;
+  color: var(--timer-muted);
+  text-align: center;
+}
+
+.timer-elapsed span {
+  display: inline-block;
+  min-width: 5ch;
+  margin-inline-start: 0.4rem;
+  color: var(--timer-hot);
+  font-family: var(--mono);
+  font-variant-numeric: tabular-nums;
+}
+
 .timer-actions {
   display: grid;
   grid-template-rows: 4rem 3rem 2.2rem;
