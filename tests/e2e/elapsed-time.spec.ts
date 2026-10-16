@@ -4,7 +4,7 @@ test('elapsed time survives rinse, pause, background time and refresh without st
   page,
 }) => {
   await page.clock.install({ time: new Date('2026-10-16T09:00:00Z') });
-  await page.goto('/tea/da-hong-pao/');
+  await page.goto('tea/da-hong-pao/');
   await page.clock.pauseAt(new Date('2026-10-16T09:00:10Z'));
   await page.getByTestId('open-brew').click();
   await page.getByTestId('start-session').click();
@@ -46,7 +46,7 @@ for (const completedAt of [undefined, 'invalid', -1]) {
   test(`a saved complete stage with no usable completion time stays recoverable: ${completedAt}`, async ({
     page,
   }) => {
-    await page.goto('/tea/da-hong-pao/');
+    await page.goto('tea/da-hong-pao/');
     await page.getByTestId('open-brew').click();
     await page.getByTestId('start-session').click();
     await page.getByTestId('skip-rinse').click();
@@ -74,7 +74,7 @@ test('mobile offline reload keeps elapsed time and a manually started next stage
 }) => {
   await page.setViewportSize({ width: 375, height: 667 });
   await page.clock.install({ time: new Date('2026-10-16T10:00:00Z') });
-  await page.goto('/tea/da-hong-pao/');
+  await page.goto('tea/da-hong-pao/');
   await page.getByTestId('open-brew').click();
   await page.getByTestId('start-session').click();
   await page.evaluate(() => navigator.serviceWorker.ready.then(() => undefined));
