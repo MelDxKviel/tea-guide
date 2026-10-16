@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
 
 test('da hong pao brewing critical path and refresh recovery', async ({ page }) => {
-  await page.goto('/tea/da-hong-pao/');
+  await page.goto('tea/da-hong-pao/');
   await expect(page.getByRole('heading', { level: 1 })).toContainText('Да Хун Пао');
   await expect(page.locator('body')).toContainText('8 г / 110 мл');
 
@@ -28,7 +28,7 @@ test('da hong pao brewing critical path and refresh recovery', async ({ page }) 
 });
 
 test('another tea cannot silently replace a paused brewing session', async ({ page }) => {
-  await page.goto('/tea/da-hong-pao/');
+  await page.goto('tea/da-hong-pao/');
   await page.getByTestId('open-brew').click();
   await page.getByRole('button', { name: '120', exact: true }).click();
   await page.getByTestId('start-session').click();
@@ -37,7 +37,7 @@ test('another tea cannot silently replace a paused brewing session', async ({ pa
   await page.getByTestId('pause').click();
   const saved = await page.evaluate(() => localStorage.getItem('tea-guide:session:v1'));
 
-  await page.goto('/tea/tie-guan-yin/');
+  await page.goto('tea/tie-guan-yin/');
   await page.locator('[data-recovery-dismiss]').click();
   await page.getByTestId('open-brew').click();
   await page.getByRole('button', { name: '150', exact: true }).click();
@@ -76,7 +76,7 @@ test('another tea cannot silently replace a paused brewing session', async ({ pa
   await page.reload();
   await expect(page.getByTestId('resume')).toBeVisible();
 
-  await page.goto('/tea/tie-guan-yin/');
+  await page.goto('tea/tie-guan-yin/');
   await page.getByTestId('open-brew').click();
   await page.getByRole('button', { name: '150', exact: true }).click();
   await page.getByRole('button', { name: 'Крепче', exact: true }).click();
@@ -99,18 +99,18 @@ test('replacement asks again if another tab has started a different tea', async 
   page,
   context,
 }) => {
-  await page.goto('/tea/da-hong-pao/');
+  await page.goto('tea/da-hong-pao/');
   await page.getByTestId('open-brew').click();
   await page.getByTestId('start-session').click();
 
-  await page.goto('/tea/tie-guan-yin/');
+  await page.goto('tea/tie-guan-yin/');
   await page.getByTestId('open-brew').click();
   await page.getByTestId('start-session').click();
   const prompt = page.locator('[data-replace-session]');
   await expect(prompt).toContainText('Да Хун Пао');
 
   const otherTab = await context.newPage();
-  await otherTab.goto('/tea/shu-puer/');
+  await otherTab.goto('tea/shu-puer/');
   await otherTab.getByTestId('open-brew').click();
   await otherTab.getByTestId('start-session').click();
   await otherTab.getByRole('button', { name: 'Заменить новым' }).click();

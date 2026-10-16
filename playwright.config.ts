@@ -1,7 +1,10 @@
 import { defineConfig, devices } from '@playwright/test';
 
 const port = 4321;
-const baseURL = process.env.PLAYWRIGHT_BASE_URL ?? `http://127.0.0.1:${port}`;
+// Build and preview must share BASE_PATH, including GitHub Pages subdirectories.
+const basePath = `/${(process.env.BASE_PATH ?? '').replace(/^\/+|\/+$/g, '')}`;
+const baseURL =
+  process.env.PLAYWRIGHT_BASE_URL ?? `http://127.0.0.1:${port}${basePath.replace(/\/$/, '')}/`;
 
 export default defineConfig({
   testDir: './tests/e2e',

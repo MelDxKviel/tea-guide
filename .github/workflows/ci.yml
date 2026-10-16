@@ -9,6 +9,9 @@ on:
 jobs:
   check:
     runs-on: ubuntu-latest
+    env:
+      SITE_URL: https://example.github.io/tea-guide
+      BASE_PATH: /tea-guide/
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -39,9 +42,6 @@ jobs:
 
       - name: Build
         run: npm run build
-        env:
-          SITE_URL: https://example.github.io/tea-guide
-          BASE_PATH: /tea-guide/
 
       - name: Install Playwright Chromium
         run: npx playwright install --with-deps chromium
