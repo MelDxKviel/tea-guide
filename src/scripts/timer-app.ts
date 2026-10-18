@@ -23,7 +23,8 @@ import { playCompleteSound, requestWakeLock, unlockAudio, vibrateComplete } from
 export function mountTimerApp(): void {
   const root = document.querySelector<HTMLElement>('#timer-root');
   const raw = document.querySelector('#recipes-data')?.textContent;
-  if (!root || !raw) return;
+  const confirmation = document.querySelector<HTMLDialogElement>('[data-session-confirmation]');
+  if (!root || !raw || !confirmation) return;
 
   let recipes: Record<string, BrewingRecipe>;
   try {
@@ -48,9 +49,11 @@ export function mountTimerApp(): void {
   let prefs = loadPreferences();
   let wake: WakeLockSentinel | null = null;
   let lastStage = session.stage;
+  let pendingAction: 'end' | 'restart' | null = null;
 
   const dispatch = (action: SessionAction, now = Date.now()): void => {
     const next = reduceSession(session!, recipe, action, now);
+    const changed = next !== session;
     const completed =
       (lastStage.endsWith('running') ||
         lastStage.endsWith('paused') ||
@@ -59,7 +62,7 @@ export function mountTimerApp(): void {
       next.stage !== lastStage;
     session = next;
     lastStage = next.stage;
-    saveSession(next);
+    if (changed) saveSession(next);
     if (completed) {
       if (prefs.sound) playCompleteSound();
       if (prefs.vibration) vibrateComplete();
@@ -67,6 +70,66 @@ export function mountTimerApp(): void {
     render();
     void syncWakeLock();
   };
+
+  const applySessionAction = (action: 'end' | 'restart'): void => {
+    dispatch({ type: action === 'end' ? 'END_SESSION' : 'RESTART_SESSION' });
+    if (action === 'end') clearSession();
+    root.querySelector<HTMLButtonElement>('button')?.focus();
+  };
+
+  const syncConfirmationStatus = (): void => {
+    if (!session) return;
+    const status = confirmation.querySelector<HTMLElement>('[data-session-confirm-status]')!;
+    status.textContent = isRunningState(session.stage)
+      ? t('timer.confirm.running')
+      : session.stage === 'rinse-complete'
+        ? `${t('timer.rinseComplete')}. ${t('timer.rinseDrain')}`
+        : session.stage === 'infusion-complete'
+          ? t('timer.complete')
+          : '';
+    status.hidden = !status.textContent;
+  };
+
+  const requestSessionAction = (action: 'end' | 'restart'): void => {
+    if (!session) return;
+    if (session.stage === 'session-complete') {
+      applySessionAction(action);
+      return;
+    }
+    pendingAction = action;
+    confirmation.querySelector('#session-confirm-title')!.textContent = t(
+      `timer.confirm.${action}.title`,
+    );
+    confirmation.querySelector('#session-confirm-summary')!.textContent =
+      `${session.teaName} · ${sessionStageLabel(session)}`;
+    confirmation.querySelector('#session-confirm-description')!.textContent = t(
+      `timer.confirm.${action}.description`,
+    );
+    syncConfirmationStatus();
+    confirmation.querySelector('[data-confirm-session-action]')!.textContent = t(`timer.${action}`);
+    document.body.classList.add('is-locked');
+    confirmation.showModal();
+    confirmation.querySelector<HTMLButtonElement>('[data-cancel-session-action]')?.focus();
+  };
+
+  confirmation.querySelector('[data-cancel-session-action]')?.addEventListener('click', () => {
+    confirmation.close();
+  });
+  confirmation.querySelector('[data-confirm-session-action]')?.addEventListener('click', () => {
+    const action = pendingAction;
+    pendingAction = null;
+    confirmation.close();
+    if (action) applySessionAction(action);
+  });
+  confirmation.addEventListener('close', () => {
+    document.body.classList.remove('is-locked');
+    if (!pendingAction) return;
+    // The countdown may have rendered a new menu while the dialog was open.
+    const opener = root.querySelector<HTMLButtonElement>(`[data-act="${pendingAction}"]`);
+    pendingAction = null;
+    opener?.closest('details')?.setAttribute('open', '');
+    opener?.focus();
+  });
 
   const paintClock = (): void => {
     if (!session) return;
@@ -95,6 +158,7 @@ export function mountTimerApp(): void {
     if (!session) return;
     root.innerHTML = template(session, recipe, prefs);
     bind();
+    syncConfirmationStatus();
   };
 
   const bind = (): void => {
@@ -139,14 +203,12 @@ export function mountTimerApp(): void {
     root
       .querySelector('[data-act="next"]')
       ?.addEventListener('click', () => dispatch({ type: 'NEXT_INFUSION' }));
-    root.querySelector('[data-act="end"]')?.addEventListener('click', () => {
-      dispatch({ type: 'END_SESSION' });
-      clearSession();
-      render();
-    });
+    root
+      .querySelector('[data-act="end"]')
+      ?.addEventListener('click', () => requestSessionAction('end'));
     root
       .querySelector('[data-act="restart"]')
-      ?.addEventListener('click', () => dispatch({ type: 'RESTART_SESSION' }));
+      ?.addEventListener('click', () => requestSessionAction('restart'));
     root
       .querySelector('[data-act="extend"]')
       ?.addEventListener('click', () => dispatch({ type: 'START_EXTENSION' }));
@@ -189,6 +251,7 @@ export function mountTimerApp(): void {
   });
 
   document.addEventListener('keydown', (event) => {
+    if (confirmation.open) return;
     const target = event.target as HTMLElement | null;
     if (
       target &&
@@ -221,6 +284,17 @@ export function mountTimerApp(): void {
   };
   requestAnimationFrame(frame);
   void syncWakeLock();
+}
+
+function sessionStageLabel(session: BrewSession): string {
+  return session.stage.startsWith('rinse')
+    ? t('timer.rinse')
+    : session.isExtension
+      ? t('timer.extension')
+      : t('timer.infusionOf', {
+          current: displayInfusionNumber(session),
+          total: session.totalInfusions,
+        });
 }
 
 function emptyState(message: string): string {
@@ -269,14 +343,7 @@ function template(session: BrewSession, recipe: BrewingRecipe, prefs: UserPrefer
   const complete = session.stage.endsWith('complete');
   const elapsedMs = elapsedSinceCompletionMs(session.timer, Date.now());
   const note = currentNote(session, recipe);
-  const stageLabel = rinse
-    ? t('timer.rinse')
-    : session.isExtension
-      ? t('timer.extension')
-      : t('timer.infusionOf', {
-          current: displayInfusionNumber(session),
-          total: session.totalInfusions,
-        });
+  const stageLabel = sessionStageLabel(session);
 
   let primary = '';
   let secondary = '';

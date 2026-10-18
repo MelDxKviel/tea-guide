@@ -1,6 +1,7 @@
 ---
 import TimerLayout from '../layouts/TimerLayout.astro';
 import { getCollection } from 'astro:content';
+import { t } from '../i18n';
 
 const recipes = await getCollection('recipes');
 const map = Object.fromEntries(recipes.map((entry) => [entry.data.id, entry.data]));
@@ -8,6 +9,23 @@ const map = Object.fromEntries(recipes.map((entry) => [entry.data.id, entry.data
 
 <TimerLayout title="Чаепитие — Tea Guide" description="Таймер проливов">
   <div id="timer-root"></div>
+  <dialog
+    class="timer-confirm"
+    data-session-confirmation
+    aria-labelledby="session-confirm-title"
+    aria-describedby="session-confirm-summary session-confirm-description"
+  >
+    <h2 id="session-confirm-title"></h2>
+    <p id="session-confirm-summary"></p>
+    <p id="session-confirm-description"></p>
+    <p data-session-confirm-status aria-live="polite" hidden></p>
+    <div class="timer-confirm__actions">
+      <button class="btn" type="button" data-cancel-session-action>
+        {t('timer.confirm.keep')}
+      </button>
+      <button class="btn btn--ghost" type="button" data-confirm-session-action></button>
+    </div>
+  </dialog>
   <script type="application/json" id="recipes-data" set:html={JSON.stringify(map)} />
   <script>
     import { mountTimerApp } from '../scripts/timer-app';

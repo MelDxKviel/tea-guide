@@ -1457,6 +1457,45 @@ body.is-timer .skip-link {
   color: var(--timer-hot);
 }
 
+.timer-confirm {
+  width: min(30rem, calc(100% - 2rem));
+  max-height: calc(100dvh - 2rem);
+  margin: auto;
+  padding: clamp(1rem, 4vw, 1.5rem);
+  overflow-y: auto;
+  border: 1px solid var(--timer-line);
+  border-radius: var(--radius);
+  background: var(--timer-surface);
+  color: var(--timer-ink);
+}
+
+.timer-confirm::backdrop {
+  background: rgb(0 0 0 / 0.7);
+}
+
+.timer-confirm h2 {
+  margin: 0;
+  font-size: clamp(1.25rem, 4vw, 1.6rem);
+  line-height: 1.25;
+}
+
+.timer-confirm p {
+  margin: 0.85rem 0;
+  color: var(--timer-muted);
+  overflow-wrap: anywhere;
+}
+
+.timer-confirm__actions {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 1.25rem;
+}
+
+.timer-confirm__actions .btn {
+  min-height: 3rem;
+  white-space: normal;
+}
+
 .timer-more {
   border-top: 1px solid var(--timer-line);
 }

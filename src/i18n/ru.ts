@@ -109,6 +109,14 @@ export const ru = {
   'timer.next': 'Следующий пролив',
   'timer.end': 'Завершить чаепитие',
   'timer.restart': 'Начать сначала',
+  'timer.confirm.end.title': 'Завершить чаепитие?',
+  'timer.confirm.end.description':
+    'Текущий прогресс будет удалён. Продолжить с этого места не получится.',
+  'timer.confirm.restart.title': 'Начать чаепитие сначала?',
+  'timer.confirm.restart.description':
+    'Прогресс и изменения времени сбросятся. Посуда, объём и крепость сохранятся.',
+  'timer.confirm.keep': 'Продолжить чаепитие',
+  'timer.confirm.running': 'Таймер продолжает отсчёт, пока открыто это окно.',
   'timer.sessionDone': 'Чаепитие завершено',
   'timer.brewAgain': 'Заварить ещё раз',
   'timer.backToTea': 'Вернуться к чаю',
